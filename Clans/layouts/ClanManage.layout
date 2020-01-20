@@ -1,0 +1,264 @@
+PanelWidgetClass rootFrame {
+ color 0 0 0 1
+ position 0 0
+ size 893 486
+ halign center_ref
+ valign center_ref
+ hexactpos 1
+ vexactpos 1
+ hexactsize 1
+ vexactsize 1
+ style rover_sim_colorable
+ {
+  ScrollWidgetClass scrollContributions {
+   ignorepointer 1
+   position 20 20
+   size 650 350
+   valign bottom_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   "Scrollbar V" 1
+  }
+  ButtonWidgetClass btnDisband {
+   color 0.5608 0.0706 0.0706 1
+   position 20 20
+   size 180 35
+   halign right_ref
+   valign bottom_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   style DayZDefaultButton
+   text "Disband Clan"
+   text_proportion 0.45
+  }
+  ButtonWidgetClass btnDemote {
+   color 0.5608 0.0706 0.0706 1
+   position 20 65
+   size 180 35
+   halign right_ref
+   valign bottom_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   style DayZDefaultButton
+   text "Demote"
+   text_proportion 0.45
+  }
+  ButtonWidgetClass btnPromote {
+   color 0.5608 0.0706 0.0706 1
+   position 20 110
+   size 180 35
+   halign right_ref
+   valign bottom_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   style DayZDefaultButton
+   text "Promote"
+   text_proportion 0.45
+  }
+  ButtonWidgetClass btnUpgrade {
+   color 0.5608 0.0706 0.0706 1
+   position 20 155
+   size 180 35
+   halign right_ref
+   valign bottom_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   style DayZDefaultButton
+   text "Upgrade Clan"
+   text_proportion 0.45
+  }
+  ButtonWidgetClass btnLeave {
+   color 0.5608 0.0706 0.0706 1
+   position 20 320
+   size 180 35
+   halign right_ref
+   valign bottom_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   style DayZDefaultButton
+   text "Leave Clan"
+   text_proportion 0.45
+  }
+  ButtonWidgetClass btnContribute {
+   color 0.5608 0.0706 0.0706 1
+   position 20 365
+   size 180 35
+   halign right_ref
+   valign bottom_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   style DayZDefaultButton
+   text "Contribute"
+   text_proportion 0.45
+  }
+  ButtonWidgetClass btnClose {
+   color 0.5608 0.0706 0.0706 1
+   position 10 10
+   size 20 20
+   halign right_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   style Default
+   text "X"
+   "text color" 0.5608 0.0706 0.0706 1
+  }
+  PanelWidgetClass pnlTitleBar {
+   ignorepointer 1
+   color 0.4902 0.4902 0.4902 1
+   position 20 370
+   size 650 30
+   valign bottom_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   style rover_sim_colorable
+  }
+  GridSpacerWidgetClass gridTitle {
+   ignorepointer 1
+   position 30 366
+   size 630 30
+   valign bottom_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   Padding 0
+   Margin 0
+   content_valign center
+   Rows 1
+   {
+    TextWidgetClass txtName {
+     ignorepointer 1
+     position 10 10
+     size 48 48
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     text "Name"
+    }
+    TextWidgetClass txtRank {
+     ignorepointer 1
+     position 10 10
+     size 48 48
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     text "Rank"
+    }
+    TextWidgetClass txtContribution {
+     ignorepointer 1
+     position 10 10
+     size 48 48
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     text "Contributions"
+    }
+   }
+  }
+  TextWidgetClass txtTitle {
+   ignorepointer 1
+   position 20 400
+   size 650 30
+   valign bottom_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   text "Placeholder"
+   "exact text" 0
+   text_proportion 0.8
+   "text halign" center
+   "text valign" center
+  }
+  PanelWidgetClass pnlBorder {
+   ignorepointer 1
+   color 0.5608 0.0706 0.0706 1
+   position 0 0
+   size 1 1
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+   style Outline
+  }
+  TextWidgetClass txtOnTitle {
+   ignorepointer 1
+   position 693 400
+   size 115 30
+   valign bottom_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   text "Members Online"
+   text_proportion 0.6
+   "size to text h" 1
+   "text valign" center
+  }
+  TextWidgetClass txtOnNum {
+   ignorepointer 1
+   position 20 400
+   size 30 30
+   halign right_ref
+   valign bottom_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   text "999"
+   text_proportion 0.6
+   "size to text h" 1
+   "text valign" center
+  }
+  TextWidgetClass txtFundTitle {
+   ignorepointer 1
+   position 693 290
+   size 115 30
+   valign bottom_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   text "Clan Funds"
+   text_proportion 0.6
+   "size to text h" 1
+   "text valign" center
+  }
+  TextWidgetClass txtFundNum {
+   ignorepointer 1
+   position 20 290
+   size 30 30
+   halign right_ref
+   valign bottom_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   text "999999"
+   text_proportion 0.6
+   "size to text h" 1
+   "text valign" center
+  }
+ }
+}

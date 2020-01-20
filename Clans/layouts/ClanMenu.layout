@@ -1,0 +1,145 @@
+PanelWidgetClass root {
+ color 0 0 0 1
+ position 0 0
+ size 960 508
+ halign center_ref
+ valign center_ref
+ hexactpos 1
+ vexactpos 1
+ hexactsize 1
+ vexactsize 1
+ style rover_sim_colorable
+ {
+  ButtonWidgetClass btnCreateClan {
+   color 0.5608 0.0706 0.0706 1
+   position 177 72
+   size 153 48
+   halign right_ref
+   valign bottom_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   style DayZDefaultButton
+   text "Create Clan"
+   text_proportion 0.45
+  }
+  ButtonWidgetClass btnManageClan {
+   color 0.5608 0.0706 0.0706 1
+   position 20 20
+   size 310 48
+   halign right_ref
+   valign bottom_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   style DayZDefaultButton
+   text "Manage Clan"
+   text_proportion 0.45
+   switch normal
+  }
+  ButtonWidgetClass btnJoinClan {
+   color 0.5608 0.0706 0.0706 1
+   position 20 72
+   size 153 48
+   halign right_ref
+   valign bottom_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   style DayZDefaultButton
+   text "Join Clan"
+   text_proportion 0.45
+  }
+  ButtonWidgetClass btnInviteToClan {
+   color 0.5608 0.0706 0.0706 1
+   position 20 130
+   size 310 48
+   halign right_ref
+   valign bottom_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   style DayZDefaultButton
+   text "Invite To Clan"
+   text_proportion 0.45
+  }
+  ButtonWidgetClass btnClose {
+   color 0.5608 0.0706 0.0706 1
+   position 5 5
+   size 15 15
+   halign right_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   style Default
+   text "X"
+   "text color" 0.5608 0.0706 0.0706 1
+  }
+  PanelWidgetClass pnlOutline {
+   ignorepointer 1
+   color 0.5608 0.0706 0.0706 1
+   position 0 0
+   size 1 1
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+   style Outline
+  }
+  ScrollWidgetClass scrollPlayerList {
+   ignorepointer 1
+   position 20 180
+   size 310 245
+   halign right_ref
+   valign bottom_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   "Scrollbar V" 1
+  }
+  ScrollWidgetClass scrollClanLeaderboard {
+   ignorepointer 1
+   position 20 20
+   size 600 405
+   valign bottom_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   "Scrollbar V" 1
+  }
+  TextWidgetClass txtPlayerList {
+   ignorepointer 1
+   position 20 430
+   size 310 30
+   halign right_ref
+   valign bottom_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   text "Players Online: "
+   "text halign" center
+   "text valign" center
+  }
+  TextWidgetClass txtClanLeaderboard {
+   ignorepointer 1
+   position 20 430
+   size 600 30
+   valign bottom_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   text "Top Clans"
+   "text halign" center
+   "text valign" center
+  }
+ }
+}

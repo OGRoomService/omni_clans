@@ -1,0 +1,330 @@
+FrameWidgetClass rootFrame {
+ position 0 0
+ size 1 1
+ hexactpos 0
+ vexactpos 0
+ hexactsize 0
+ vexactsize 0
+ {
+  PanelWidgetClass rootCreate {
+   visible 1
+   color 0 0 0 1
+   position 0 0
+   size 960 508
+   halign center_ref
+   valign center_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   style rover_sim_colorable
+   {
+    ButtonWidgetClass btnCreateClan {
+     color 0.5608 0.0706 0.0706 1
+     position 177 72
+     size 153 48
+     halign right_ref
+     valign bottom_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     style DayZDefaultButton
+     text "Create Clan"
+     text_proportion 0.45
+    }
+    ButtonWidgetClass btnManageClan {
+     color 0.5608 0.0706 0.0706 1
+     position 20 20
+     size 310 48
+     halign right_ref
+     valign bottom_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     style DayZDefaultButton
+     text "Manage Clan"
+     text_proportion 0.45
+     switch normal
+    }
+    ButtonWidgetClass btnJoinClan {
+     color 0.5608 0.0706 0.0706 1
+     position 20 72
+     size 153 48
+     halign right_ref
+     valign bottom_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     style DayZDefaultButton
+     text "Join Clan"
+     text_proportion 0.45
+    }
+    ButtonWidgetClass btnInviteToClan {
+     color 0.5608 0.0706 0.0706 1
+     position 20 130
+     size 310 48
+     halign right_ref
+     valign bottom_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     style DayZDefaultButton
+     text "Invite To Clan"
+     text_proportion 0.45
+    }
+    ButtonWidgetClass btnClose {
+     color 0.5608 0.0706 0.0706 1
+     position 5 5
+     size 15 15
+     halign right_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     style Default
+     text "X"
+     "text color" 0.5608 0.0706 0.0706 1
+    }
+    PanelWidgetClass pnlOutline {
+     ignorepointer 1
+     color 0.5608 0.0706 0.0706 1
+     position 0 0
+     size 1 1
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     style Outline
+    }
+    ScrollWidgetClass scrollPlayerList {
+     ignorepointer 1
+     position 20 180
+     size 310 245
+     halign right_ref
+     valign bottom_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     "Scrollbar V" 1
+     {
+      GridSpacerWidgetClass gridPlayerList {
+       ignorepointer 1
+       size 1 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       Padding 0
+       Margin 0
+       "Size To Content V" 1
+       Columns 1
+       Rows 100
+      }
+     }
+    }
+    ScrollWidgetClass scrollClanLeaderboard {
+     ignorepointer 1
+     position 20 20
+     size 600 405
+     valign bottom_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     "Scrollbar V" 1
+     {
+      GridSpacerWidgetClass gridLeaderBoard {
+       ignorepointer 1
+       size 1 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       Padding 0
+       Margin 0
+       "Size To Content V" 1
+       Columns 1
+       Rows 100
+      }
+     }
+    }
+    TextWidgetClass txtPlayerList {
+     ignorepointer 1
+     position 20 430
+     size 310 30
+     halign right_ref
+     valign bottom_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     text "Players Online: "
+     "text halign" center
+     "text valign" center
+    }
+    TextWidgetClass txtClanLeaderboard {
+     ignorepointer 1
+     position 20 430
+     size 600 30
+     valign bottom_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     text "Top Clans"
+     "text halign" center
+     "text valign" center
+    }
+   }
+  }
+  PanelWidgetClass rootInput {
+   visible 0
+   color 0 0 0 1
+   position 0 0
+   size 380 137
+   halign center_ref
+   valign center_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   style rover_sim_colorable
+   {
+    ButtonWidgetClass btnEnter {
+     color 0.5608 0.0706 0.0706 1
+     position 0 10
+     size 70 20
+     halign center_ref
+     valign bottom_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     style DayZDefaultButton
+     text "Create"
+     text_proportion 0.7
+    }
+    PanelWidgetClass pnlInputOutline {
+     visible 1
+     ignorepointer 1
+     color 0.5608 0.0706 0.0706 1
+     size 1 1
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     style Outline
+    }
+    EditBoxWidgetClass edtInput {
+     color 0.5608 0.0706 0.0706 1
+     size 350 48
+     halign center_ref
+     valign center_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+    }
+    TextWidgetClass txtEnter {
+     ignorepointer 1
+     position 0 10
+     size 20 30
+     halign center_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     text "Enter Clan Name"
+     "size to text h" 1
+     "size to text v" 0
+    }
+   }
+  }
+  PanelWidgetClass rootInvite {
+   visible 0
+   ignorepointer 1
+   color 0 0 0 1
+   position 651 0
+   size 350 200
+   halign center_ref
+   valign center_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   style rover_sim_colorable
+   {
+    PanelWidgetClass pnlInvOutline {
+     ignorepointer 1
+     color 0.5608 0.0706 0.0706 1
+     position 0 0
+     size 1 1
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     style Outline
+    }
+    TextWidgetClass txtHeader {
+     ignorepointer 1
+     position 0 10
+     size 48 38
+     halign center_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     text "Accept Invite?"
+     "size to text h" 1
+     "size to text v" 0
+    }
+    TextWidgetClass txtClanName {
+     ignorepointer 1
+     position 0 50
+     size 48 38
+     halign center_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     text "reeeee"
+     "size to text h" 1
+     "size to text v" 0
+    }
+    ButtonWidgetClass btnAcceptInvite {
+     color 0.0706 0.5608 0.1922 1
+     position -75 35
+     size 100 48
+     halign center_ref
+     valign bottom_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     style DayZDefaultButton
+     text "YES"
+     text_proportion 0.85
+    }
+    ButtonWidgetClass btnDeclineInvite {
+     color 0.5608 0.0706 0.0706 1
+     position 75 35
+     size 100 48
+     halign center_ref
+     valign bottom_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     style DayZDefaultButton
+     text "NO"
+     text_proportion 0.85
+    }
+   }
+  }
+ }
+}

@@ -1,0 +1,41 @@
+GridSpacerWidgetClass rootFrame {
+ position 0 0
+ size 1 0.146
+ hexactpos 0
+ vexactpos 0
+ hexactsize 0
+ vexactsize 0
+ Padding 0
+ Margin 0
+ "Size To Content V" 1
+ Rows 1
+ {
+  TextWidgetClass txtName {
+   ignorepointer 1
+   position 10 10
+   size 48 48
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+  }
+  TextWidgetClass txtRank {
+   ignorepointer 1
+   position 10 10
+   size 48 48
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+  }
+  TextWidgetClass txtContribution {
+   ignorepointer 1
+   position 10 10
+   size 48 48
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+  }
+ }
+}
