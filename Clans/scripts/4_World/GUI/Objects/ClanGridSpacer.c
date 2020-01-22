@@ -9,7 +9,6 @@ class ClanGridSpacer {
     }
 
     void ~ClanGridSpacer() {
-        Print("Deleting grid");
         if (grid) {
             grid.Unlink();
         }

@@ -11,7 +11,6 @@ class ClanClientManager : PluginBase {
             delete activeClan;
         }
         activeClan = clan;
-        Print("Set clan successfully activeClan=" + activeClan);
         activeClan.Test();
     }
 
@@ -25,14 +24,11 @@ class ClanClientManager : PluginBase {
     }
 
     void DeleteInvitation() {
-        Print("removing clan invite");
-
         clanInviteName = string.Empty;
     }
 
     void SetPlainId(string id) {
         if (plainId == string.Empty) {
-            Print("set plainid=" + id);
             plainId = id;
         }
     }

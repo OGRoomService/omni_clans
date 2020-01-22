@@ -10,5 +10,5 @@ enum ClanRPCEnum {
     ClientRemoveOnlinePlayer,
     ClientReceivePlayerList,
     ClientReceiveInvite,
-    ClientSetPlainId
+    ClientInitialize
 }

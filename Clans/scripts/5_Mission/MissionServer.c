@@ -3,10 +3,10 @@ modded class MissionServer {
         super.InvokeOnConnect(player, identity);
 
         if (player) {
-            auto params = new Param1<string>(identity.GetPlainId());
+            auto params = new Param2<string, ref ClanConfig>(identity.GetPlainId(), GetClanManager().GetConfig());
             GetClanServerManager().AddPlayerToActiveClan(player);
             GetClanManager().AddOnlinePlayer("", "", player);
-            GetGame().RPCSingleParam(player, ClanRPCEnum.ClientSetPlainId, params, true, identity);
+            GetGame().RPCSingleParam(player, ClanRPCEnum.ClientInitialize, params, true, identity);
         }
         /* super.InvokeOnConnect(player, identity);
 

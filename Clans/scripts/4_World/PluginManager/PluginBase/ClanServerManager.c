@@ -7,10 +7,15 @@ class ClanServerManager : PluginBase {
     private string clanDirectory = ClanStatic.clanDirectory;
     private string fileExtension = ClanStatic.fileExtension;
     private ref array<ref ActiveClan> activeClans;
+    private ref array<ref Clan> allClans;
 
     void ClanServerManager() {
         activeClans = new array<ref ActiveClan>();
+        allClans = new array<ref Clan>();
         CheckAndCreateDirectories();
+        LoadClans();
+        LoadConfig();
+        //CreateTestClans();
     }
 
     void CheckAndCreateDirectories() {
@@ -25,6 +30,80 @@ class ClanServerManager : PluginBase {
         }
     }
 
+    private void LoadConfig() {
+        ref ClanConfig config;
+
+        if (FileExist(baseModDir + "\\ClanConfig.json")) {
+            JsonFileLoader<ClanConfig>.JsonLoadFile(baseModDir + "\\ClanConfig.json", config);
+        } else {
+            config = new ClanConfig();
+        }
+        config.Verify();
+        GetClanManager().SetConfig(config);
+    }
+
+    private void LoadClans() {
+        // FOR SORTING USE A RECURSIVE CALL THAT LOOPS OVER ARRAY AND COMPARES RANK. PLACE IT ACCORDINGLY
+        string fileName, clanDir;
+        FileAttr fileAttr;
+        FindFileHandle clans = FindFile(clanDirectory + "\\*.clan", fileName, fileAttr, 0);
+        ref array<string> arrayFileNames = new array<string>();
+
+        if (!clans) { return; }
+        arrayFileNames.Insert(fileName);
+
+        while(FindNextFile(clans, fileName, fileAttr)) {
+            arrayFileNames.Insert(fileName);
+        }
+        CloseFindFile(clans);
+        
+        foreach (string name : arrayFileNames) {
+            Clan clan;
+            clanDir = clanDirectory + "\\" + name
+
+            if (FileExist(clanDir)) {
+                JsonFileLoader<Clan>.JsonLoadFile(clanDir, clan);
+                // Check the date here and other shit. If clan fails validation delete it and move on to the next one...
+                if (clan.Verify()) {
+                    SortClans(clan);
+                } else {
+                    delete clan;
+                    DeleteFile(clanDir);
+                }
+            }
+        }
+    }
+
+    private void SortClans(Clan clan) {
+        int count = allClans.Count();
+        bool inserted = false;
+
+        if (count < 1) {
+            allClans.Insert(clan);
+        } else {
+            for (int i = 0; i < count; i++) {
+                ref Clan c = allClans[i];
+
+                if (c.GetRank() < clan.GetRank()) {
+                    allClans.InsertAt(clan, i);
+                    inserted = true;
+                    break;
+                }
+            }
+            if (!inserted) {
+                allClans.Insert(clan);
+            }
+        }
+    }
+
+    private void CreateTestClans() {
+        for (int i = 0; i < 100; i++) {
+            ActiveClan clan = new ActiveClan("yeet", "yeet", "" + Math.RandomInt(0, 999999999));
+            clan.SetRank(i);
+            clan.Save();
+        }
+    }
+
     void CreateClan(PlayerBase player, string name) {
         string error;
         name.ToLower();
@@ -35,8 +114,6 @@ class ClanServerManager : PluginBase {
         string playerDir = playerDirectory + "\\" + playerId;
         ActiveClan clan = new ActiveClan(playerId, player.GetIdentity().GetName(), name);
         ClanPlayer cPlayer = new ClanPlayer(name, playerId);
-
-        Print("CREATING CLAN BY NAME {" + name + "} BY PLAYER {" + playerId + "}");
 
         MakeDirectory(playerDir);
         AddActiveClan(clan, player);
@@ -72,14 +149,11 @@ class ClanServerManager : PluginBase {
             }
         }
         if (!found) {
+            clan.Verify();
             clan.InitTicker();
             activeClans.Insert(clan);
         }
         clan.AddActivePlayer(player);
-    }
-
-    void AddPlayerInvitation(string clanName, string playerId) {
-
     }
 
     void RemoveFromActiveClan(PlayerBase player) { }

@@ -57,11 +57,9 @@ class ClanCreateMenu : ClanMenu {
 					return true;
 				} else if (inviteRoot.IsVisible()) {
 					if (w.GetName() == "btnAcceptInvite" || w.GetName() == "btnDeclineInvite") {
-						Print("Doing some bullshit with the invite");
 						clanName = GetClanClientManager().GetInvite();
 						
 						if (clanName != string.Empty) {
-							Print("clan invite exists");
 							auto paramManageInvite = new Param2<string, string>(GetClanClientManager().GetInvite(), w.GetName());
 							GetGame().RPCSingleParam(GetGame().GetPlayer(), ClanRPCEnum.ServerManageInvite, paramManageInvite, true);
 							GetClanClientManager().DeleteInvitation();
@@ -77,7 +75,6 @@ class ClanCreateMenu : ClanMenu {
 						return true;
 					} else if (w.GetName() == "btnInviteToClan") {
 						if (txtSelectedPlayer) {
-							Print("sending invite rpc to server");
 							auto paramsSendInvite = new Param2<string, string>(GetClanClientManager().GetClan().GetName(), txtSelectedPlayer.GetClanUser().GetId());
 							GetGame().RPCSingleParam(GetGame().GetPlayer(), ClanRPCEnum.ServerAddInvitation, paramsSendInvite, true);
 							return true;
@@ -85,15 +82,12 @@ class ClanCreateMenu : ClanMenu {
 					}
 				}
 			}
-			Print("MENU Clicked widgetName=" + widgetName);
 		}
 		return false;
 	}
 
 	bool OnMouseButtonUp(Widget w, int x, int y, int button) {
 		super.OnMouseButtonUp(w, x, y, button);
-
-		Print("Mouse Button Up Event: widgetname=" + w.GetName());
 
 		if (button == MouseState.LEFT) {
 			if (TextWidget.Cast(w)) {
@@ -106,7 +100,6 @@ class ClanCreateMenu : ClanMenu {
 								txtSelectedPlayer.SetColor(ARGB(255, 190, 190, 190));
 								txtSelectedPlayer.HideBackground();
 							}
-							Print("Found widget playerId=" + txtWidget.GetPlayerId());
 							txtSelectedPlayer = txtWidget;
 							txtWidget.SetColor(ARGB(255, 255, 255, 255));
 							txtWidget.ShowBackground();
@@ -206,7 +199,6 @@ class ClanCreateMenu : ClanMenu {
 	}
 	
 	void CheckInvite() {
-		Print("Checking invite conditionals");
 		string invite = GetClanClientManager().GetInvite();
 		if (invite != string.Empty) {
 			txtClanName.SetText(invite);

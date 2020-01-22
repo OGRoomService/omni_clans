@@ -17,13 +17,14 @@ class ClanClientRPCHandler : PluginBase {
         string error, clanName;
 
         switch (rpc_type) {
-            case ClanRPCEnum.ClientSetPlainId:
+            case ClanRPCEnum.ClientInitialize:
                 {
                     Print("Set Plain ID RPC Received");
-                    Param1<string> dataPlainId;
-                    if (!ctx.Read(dataPlainId)) { return; }
+                    Param2<string, ref ClanConfig> dataIntialize;
+                    if (!ctx.Read(dataIntialize)) { return; }
 
-                    GetClanClientManager().SetPlainId(dataPlainId.param1);
+                    GetClanClientManager().SetPlainId(dataIntialize.param1);
+                    GetClanManager().SetConfig(dataIntialize.param2);
                     break;
                 }
             case ClanRPCEnum.ClientManageMenu:

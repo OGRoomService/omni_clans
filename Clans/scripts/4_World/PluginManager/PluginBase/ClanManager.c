@@ -2,12 +2,11 @@
 
 class ClanManager : PluginBase {
     private ref array<ref ClanUser> playerList;
+    private ref ClanConfig config;
     // In here store shit that'll be used client/server side. For instance, if I need a player list, or clan leaderboard. That kind of shit
 
     void ClanManager() {
         playerList = new array<ref ClanUser>();
-
-        Print("PLAYERLIST SIZE =" + playerList.Count());
     }
 
     void SetPlayerList(ref array<ref ClanUser> list) {
@@ -62,6 +61,14 @@ class ClanManager : PluginBase {
                 GetGame().RPCSingleParam(player, ClanRPCEnum.ClientRemoveOnlinePlayer, params, true);
             }
         }
+    }
+
+    void SetConfig(ref ClanConfig c) {
+        config = c;
+    }
+
+    ref ClanConfig GetConfig() {
+        return config;
     }
 
     ref array<ref ClanUser> GetPlayerList() {

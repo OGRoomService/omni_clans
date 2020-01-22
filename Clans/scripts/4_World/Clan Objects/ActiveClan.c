@@ -14,7 +14,7 @@ class ActiveClan : Clan {
     void InitTicker() {
         if (GetGame().IsServer() && GetGame().IsMultiplayer()) {
             GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).Remove(SynchMembers);
-            GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(SynchMembers, 1000, true);
+            GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(SynchMembers, GetClanManager().GetConfig().GetTrackerUpdateInterval() * 1000, true);
         }
     }
 
@@ -58,7 +58,6 @@ class ActiveClan : Clan {
 
     void RemovePlayerInvitation(string playerId) {
         if (!GetGame().IsServer() || !GetGame().IsMultiplayer()) { return; }
-        Print("REMOVING PLAYER INVITE");
         if (playerInvitations.Find(playerId) != -1) {
             playerInvitations.RemoveItem(playerId);
             SendRPC();
@@ -75,20 +74,10 @@ class ActiveClan : Clan {
 
         foreach (ClanMemberTracker tracker : onlinePlayers) {
             if (tracker.NeedsClanSynch()) {
-                Print("Yay it's working");
                 needsSynch = true;
             }
         }
         if (needsSynch) {
-            Print("Client needs clan update");
-            Print("Client needs clan update");
-            Print("Client needs clan update");
-            Print("Client needs clan update");
-            Print("Client needs clan update");
-            Print("Client needs clan update");
-            Print("Client needs clan update");
-            Print("Client needs clan update");
-            Print("Client needs clan update");
             Print("Client needs clan update");
             SendRPC();
         }

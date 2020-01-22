@@ -1,9 +1,13 @@
 class ClanMemberTracker {
     private PlayerBase player;
-    private float updateSens = 1;
+    private vector playerPos;
+    private float updateSens = GetClanManager().GetConfig().GetTrackerSynchSens();
     private float lastHPUpdate, lastBloodUpdate, lastShockUpdate;
     private float hp, blood, shock;
     private float maxHP, maxBlood, maxShock;
+    private int posUpdateInterval = GetClanManager().GetConfig().GetTrackerPositionSens();
+    private int posUpdateSens = GetClanManager().GetConfig().GetTrackerPositionSens();
+    private int lastPosUpdate;
     private string pId, pPlainId;
 
     void ClanMemberTracker(PlayerBase p) {
@@ -27,6 +31,7 @@ class ClanMemberTracker {
         hp = player.GetHealth("", "Health");
         blood = player.GetHealth("", "Blood");
         shock = player.GetHealth("", "Shock");
+        playerPos = player.GetPosition();
 
         Print("health=" + hp);
         Print("blood=" + blood);
@@ -55,7 +60,16 @@ class ClanMemberTracker {
         float currHP = (player.GetHealth("", "Health") / maxHP);
         float diff = Math.AbsFloat(currHP - lastHPUpdate);
         bool needsSynch = false;
+        vector pos;
 
+        if (lastPosUpdate >= posUpdateInterval) {
+            pos = player.GetPosition();
+
+            if (vector.Distance(pos, playerPos) > posUpdateSens) {
+                needsSynch = true;
+                lastPosUpdate = 0;
+            }
+        }
         if (diff > (updateSens / 100)) {
             lastHPUpdate = currHP;
             needsSynch = true;
@@ -74,6 +88,8 @@ class ClanMemberTracker {
             lastShockUpdate = currShock;
             needsSynch = true;
         }
+        lastPosUpdate++;
+
         if (needsSynch) {
             UpdateValues();
             return true;
@@ -111,5 +127,9 @@ class ClanMemberTracker {
             }
         }
         return -1;
+    }
+
+    vector GetPosition() {
+        return playerPos;
     }
 }

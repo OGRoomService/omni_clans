@@ -49,18 +49,14 @@ class ClanServerRPCHandler : PluginBase {
                     playerId = dataAddInvitation.param2;
 
                     if (player && clanName != string.Empty && playerId != string.Empty) {
-                        Print("Met conditionals, grabbing clan");
                         clan = GetClanServerManager().GetActiveClanByName(clanName);
 
                         if (clan && clan.IsMember(player.GetIdentity().GetPlainId())) {
-                            Print("clan found, sender is a part of the clan");
                             clan.AddPlayerInvitation(playerId);
                         }
-                        Print("Searching for target player by provided id from client");
                         targetPlayer = GetClanServerManager().GetPlayerBaseById(playerId);
 
                         if (targetPlayer) {
-                            Print("Found player! sending player invite! " + targetPlayer.GetIdentity().GetPlainId());
                             auto paramsInvite = new Param1<string>(clanName);
                             GetGame().RPCSingleParam(targetPlayer, ClanRPCEnum.ClientReceiveInvite, paramsInvite, true, targetPlayer.GetIdentity());
                         }
@@ -82,14 +78,11 @@ class ClanServerRPCHandler : PluginBase {
                         clan = GetClanServerManager().GetActiveClanByName(clanName);
                         playerId = player.GetIdentity().GetPlainId();
 
-                        Print("player and clanname found");
                         if (clan) {
-                            Print("clan found");
-                            Print("What the fuck is this? " + selectedOption);
                             if (selectedOption == "btnAcceptInvite" && clan.IsPlayerInvited(playerId)) {
-                                Print("adding member");
                                 clan.AddMember(player.GetIdentity().GetName(), playerId);
                             }
+                            clan.AddActivePlayer(player);
                             clan.RemovePlayerInvitation(playerId);
                         }
                     }
