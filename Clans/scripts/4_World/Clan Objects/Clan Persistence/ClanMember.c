@@ -2,10 +2,11 @@ class ClanMember {
     private string name, playerId;
     private int rank, contribution;
 
-    void ClanMember(string n, string id) {
+    void ClanMember(string n, string id, int r) {
         name = n;
         playerId = id;
         contribution = 0;
+        rank = r;
         // set rank to lowest possible rank... 
         // Should I have this in ascending order? 
         // Definitely not becuase if more ranks are added then all of a sudden the owner is no longer owner.... 
@@ -14,16 +15,34 @@ class ClanMember {
         // far apart so that they don't run into this conflict. I'll let hollow know the deal with that when this is finished.
     }
 
-    // Descending order hierarchy. 0 is top of chain = owner. Do not allow assignment to any other member
     void SetRank(int r) {
+        if (!GetGame().IsServer() || !GetGame().IsMultiplayer()) { return; }
+
         rank = r;
     }
 
+    // Descending order hierarchy. 0 is top of chain = owner. Do not allow assignment to any other member
+    void Promote() {
+        if (!GetGame().IsServer() || !GetGame().IsMultiplayer()) { return; }
+
+        // PROMOTE THE USER BASED ON NEXT LOWEST IN CONFIG;
+    }
+
+    void Demote() {
+        if (!GetGame().IsServer() || !GetGame().IsMultiplayer()) { return; }
+
+        // DEMOTE THE USER BASED ON NEXT LOWEST IN CONFIG;
+    }
+
     void AddContribution(int amount) {
+        if (!GetGame().IsServer() || !GetGame().IsMultiplayer()) { return; }
+
         contribution += amount;
     }
 
     void RemoveContribution(int amount) {
+        if (!GetGame().IsServer() || !GetGame().IsMultiplayer()) { return; }
+        
         contribution -= amount;
 
         if (contribution < 0) {

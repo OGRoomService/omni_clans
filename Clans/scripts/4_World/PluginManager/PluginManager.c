@@ -40,7 +40,7 @@ modded class PluginManager {
 			}
 			m_PluginRegister.Insert(plugin_class_name.ToType());
 		} else {
-			super.RegisterPlugin(plugin_class_name, reg_on_client, reg_on_server, reg_on_release)
+			super.RegisterPlugin(plugin_class_name, reg_on_client, reg_on_server, reg_on_release);
 		}
 	}
 }

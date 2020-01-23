@@ -1,14 +1,14 @@
-class ClanGridSpacer {
+class ClanPlayerListGrid {
     private ref GridSpacerWidget grid;
     private ref array<ref ClanTextWidget> arrayTextWidgets;
 
-    void ClanGridSpacer(Widget parent) {
+    void ClanPlayerListGrid(Widget parent) {
         arrayTextWidgets = new array<ref ClanTextWidget>();
 
         grid = GridSpacerWidget.Cast(GetGame().GetWorkspace().CreateWidgets("Clans\\layouts\\GridSpacer.layout", parent));
     }
 
-    void ~ClanGridSpacer() {
+    void ~ClanPlayerListGrid() {
         if (grid) {
             grid.Unlink();
         }

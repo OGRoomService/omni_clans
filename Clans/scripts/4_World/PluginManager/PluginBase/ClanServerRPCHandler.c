@@ -52,7 +52,7 @@ class ClanServerRPCHandler : PluginBase {
                         clan = GetClanServerManager().GetActiveClanByName(clanName);
 
                         if (clan && clan.IsMember(player.GetIdentity().GetPlainId())) {
-                            clan.AddPlayerInvitation(playerId);
+                            clan.AddInvitation(playerId);
                         }
                         targetPlayer = GetClanServerManager().GetPlayerBaseById(playerId);
 
@@ -82,8 +82,8 @@ class ClanServerRPCHandler : PluginBase {
                             if (selectedOption == "btnAcceptInvite" && clan.IsPlayerInvited(playerId)) {
                                 clan.AddMember(player.GetIdentity().GetName(), playerId);
                             }
-                            clan.AddActivePlayer(player);
-                            clan.RemovePlayerInvitation(playerId);
+                            clan.AddTracker(player);
+                            clan.RemoveInvitation(playerId);
                         }
                     }
                     break;

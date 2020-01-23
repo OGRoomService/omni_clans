@@ -20,11 +20,12 @@ class ClanClientRPCHandler : PluginBase {
             case ClanRPCEnum.ClientInitialize:
                 {
                     Print("Set Plain ID RPC Received");
-                    Param2<string, ref ClanConfig> dataIntialize;
+                    Param3<string, ref ClanConfig, ref array<ref ClanBase>> dataIntialize;
                     if (!ctx.Read(dataIntialize)) { return; }
 
                     GetClanClientManager().SetPlainId(dataIntialize.param1);
                     GetClanManager().SetConfig(dataIntialize.param2);
+                    GetClanManager().SetLeaderboard(dataIntialize.param3);
                     break;
                 }
             case ClanRPCEnum.ClientManageMenu:

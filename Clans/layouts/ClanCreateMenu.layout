@@ -1,5 +1,5 @@
 FrameWidgetClass rootFrame {
- position 0 0
+ position 0.00223 0
  size 1 1
  hexactpos 0
  vexactpos 0
@@ -127,31 +127,20 @@ FrameWidgetClass rootFrame {
       }
      }
     }
-    ScrollWidgetClass scrollClanLeaderboard {
+    GridSpacerWidgetClass gridLeaderBoard {
      ignorepointer 1
      position 20 20
-     size 600 405
+     size 600 385
      valign bottom_ref
      hexactpos 1
      vexactpos 1
      hexactsize 1
      vexactsize 1
-     "Scrollbar V" 1
-     {
-      GridSpacerWidgetClass gridLeaderBoard {
-       ignorepointer 1
-       size 1 1
-       hexactpos 0
-       vexactpos 0
-       hexactsize 0
-       vexactsize 0
-       Padding 0
-       Margin 0
-       "Size To Content V" 1
-       Columns 1
-       Rows 100
-      }
-     }
+     style Colorable
+     Padding 0
+     Margin 0
+     Columns 1
+     Rows 15
     }
     TextWidgetClass txtPlayerList {
      ignorepointer 1
@@ -179,6 +168,45 @@ FrameWidgetClass rootFrame {
      text "Top Clans"
      "text halign" center
      "text valign" center
+    }
+    GridSpacerWidgetClass gridTitleBar {
+     ignorepointer 1
+     color 0.4902 0.4902 0.4902 1
+     position 20 405
+     size 600 20
+     valign bottom_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     Padding 0
+     Margin 0
+     "Size To Content H" 1
+     Columns 2
+     Rows 1
+     {
+      TextWidgetClass txtTitleName {
+       ignorepointer 1
+       size 0.8 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       text "NAME"
+       "text halign" center
+       "text valign" center
+      }
+      TextWidgetClass txtTitleRank {
+       ignorepointer 1
+       size 0.2 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       text "RANK"
+       "text valign" center
+      }
+     }
     }
    }
   }

@@ -5,11 +5,13 @@ class ClanCreateMenu : ClanMenu {
 	protected ref ButtonWidget btnManageClan, btnJoinClan, btnInviteClan, btnCreateClan, btnAccept, btnDecline;
 	protected ref GridSpacerWidget gridPlayerList, gridLeaderBoard;
 	private ref array<ref ClanUser> playerList;
-	private ref array<ref ClanGridSpacer> arrayGridPlayerList;
+	private ref array<ref ClanPlayerListGrid> arrayGridPlayerList;
+	private ref array<ref ClanGenericGrid> arrayGenericGrids;
 	private ref ClanTextWidget txtSelectedPlayer;
 
 	override Widget Init() {
-		arrayGridPlayerList = new array<ref ClanGridSpacer>();
+		arrayGridPlayerList = new array<ref ClanPlayerListGrid>();
+		arrayGenericGrids = new array<ref ClanGenericGrid>();
 
 		wRoot = GetGame().GetWorkspace().CreateWidgets("Clans\\layouts\\ClanCreateMenu.layout");
 		inputRoot = wRoot.FindAnyWidget("rootInput");
@@ -91,7 +93,7 @@ class ClanCreateMenu : ClanMenu {
 
 		if (button == MouseState.LEFT) {
 			if (TextWidget.Cast(w)) {
-				foreach (ClanGridSpacer spacer : arrayGridPlayerList) {
+				foreach (ClanPlayerListGrid spacer : arrayGridPlayerList) {
 					if (spacer) {
 						ref ClanTextWidget txtWidget = spacer.GetChild(w);
 
@@ -116,7 +118,7 @@ class ClanCreateMenu : ClanMenu {
 		super.OnMouseEnter(w, x, y);
 
 		if (TextWidget.Cast(w)) {
-			foreach (ClanGridSpacer spacer : arrayGridPlayerList) {
+			foreach (ClanPlayerListGrid spacer : arrayGridPlayerList) {
 				if (spacer) {
 					ref ClanTextWidget txtWidget = spacer.GetChild(w);
 
@@ -134,7 +136,7 @@ class ClanCreateMenu : ClanMenu {
 		super.OnMouseLeave(w, enterW, x, y);
 
 		if (TextWidget.Cast(w)) {
-			foreach (ClanGridSpacer spacer : arrayGridPlayerList) {
+			foreach (ClanPlayerListGrid spacer : arrayGridPlayerList) {
 				if (spacer) {
 					ref ClanTextWidget txtWidget = spacer.GetChild(w);
 
@@ -154,6 +156,7 @@ class ClanCreateMenu : ClanMenu {
 		CheckClan();
 		CheckInvite();
 		BuildPlayerList();
+		BuildLeaderboard();
 	}
 
 	override void OnHide() {
@@ -161,11 +164,11 @@ class ClanCreateMenu : ClanMenu {
 	}
 
 	private void BuildPlayerList() {
-		ClanGridSpacer newGrid;
+		ClanPlayerListGrid newGrid;
 		ClanTextWidget newText;
 		int i = 0;
 		string playerId = GetClanClientManager().GetPlainId();
-		newGrid = new ClanGridSpacer(gridPlayerList);
+		newGrid = new ClanPlayerListGrid(gridPlayerList);
 		playerList = GetClanManager().GetPlayerList();
 		txtPlayerList.SetText("Players Online: " + playerList.Count());
 
@@ -176,13 +179,41 @@ class ClanCreateMenu : ClanMenu {
 
 			if (i > 99) {
 				i = 0;
-				newGrid = new ClanGridSpacer(gridPlayerList);
+				newGrid = new ClanPlayerListGrid(gridPlayerList);
 				arrayGridPlayerList.Insert(newGrid);
 			}
 			newText = newGrid.AddTextWidget(user, user.GetName());
 
 			if (userId == playerId) {
 				newText.SetColor(ARGB(255, 255, 0, 0));
+			}
+			i++;
+		}
+	}
+
+	private void BuildLeaderboard() {
+		ClanGenericGrid newGrid;
+		int i;
+		ref array<ref ClanBase> clans = new array<ref ClanBase>();
+		clans = GetClanManager().GetClanLeaderboard();
+
+		foreach (ClanBase c : clans) {
+			if (i >= 15) { break; }
+			if (c) {
+				TextWidget clanName, clanRank;
+				GridSpacerWidget grid;
+
+				newGrid = new ClanGenericGrid(gridLeaderBoard, "ClanLeaderGrid");
+				grid = newGrid.GetGrid();
+				clanName = TextWidget.Cast(grid.FindAnyWidget("clanName"));
+				clanRank = TextWidget.Cast(grid.FindAnyWidget("clanRank"));
+				clanName.SetText("" + c.GetName());
+				clanRank.SetText("" + c.GetRank());
+				arrayGenericGrids.Insert(newGrid);
+
+				if ((i % 2) == 1) {
+					grid.SetColor(ARGB(255, 125, 125, 125));
+				}
 			}
 			i++;
 		}

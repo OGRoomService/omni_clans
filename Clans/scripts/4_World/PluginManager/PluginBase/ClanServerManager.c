@@ -1,21 +1,19 @@
 class ClanServerManager : PluginBase {
-    // I might be storing all clans in memory. Or, I might filter them on server start and remove unnecessary clans from memory
-    // for leaderboard purposes.
     private string baseModDir = ClanStatic.baseModDir;
     private string playerDirectory = ClanStatic.playerDirectory;
     private string playerDataFile = ClanStatic.playerDataFile;
     private string clanDirectory = ClanStatic.clanDirectory;
     private string fileExtension = ClanStatic.fileExtension;
-    private ref array<ref ActiveClan> activeClans;
-    private ref array<ref Clan> allClans;
+    private ref array<ref ActiveClan> arrayActiveClans;
+    private ref map<PlayerIdentity, ref ActiveClan> mapPlayerActiveClan;
 
     void ClanServerManager() {
-        activeClans = new array<ref ActiveClan>();
-        allClans = new array<ref Clan>();
+        arrayActiveClans = new array<ref ActiveClan>();
+        mapPlayerActiveClan = new map<PlayerIdentity, ref ActiveClan>();
         CheckAndCreateDirectories();
-        LoadClans();
-        LoadConfig();
         //CreateTestClans();
+        LoadConfig();
+        LoadClans();
     }
 
     void CheckAndCreateDirectories() {
@@ -59,41 +57,19 @@ class ClanServerManager : PluginBase {
         
         foreach (string name : arrayFileNames) {
             Clan clan;
-            clanDir = clanDirectory + "\\" + name
+            clanDir = clanDirectory + "\\" + name;
 
             if (FileExist(clanDir)) {
                 JsonFileLoader<Clan>.JsonLoadFile(clanDir, clan);
-                // Check the date here and other shit. If clan fails validation delete it and move on to the next one...
                 if (clan.Verify()) {
-                    SortClans(clan);
+                    GetClanManager().SortClan(ClanBase.Cast(clan));
                 } else {
                     delete clan;
                     DeleteFile(clanDir);
                 }
             }
         }
-    }
-
-    private void SortClans(Clan clan) {
-        int count = allClans.Count();
-        bool inserted = false;
-
-        if (count < 1) {
-            allClans.Insert(clan);
-        } else {
-            for (int i = 0; i < count; i++) {
-                ref Clan c = allClans[i];
-
-                if (c.GetRank() < clan.GetRank()) {
-                    allClans.InsertAt(clan, i);
-                    inserted = true;
-                    break;
-                }
-            }
-            if (!inserted) {
-                allClans.Insert(clan);
-            }
-        }
+        GetClanManager().GetClanLeaderboard();
     }
 
     private void CreateTestClans() {
@@ -142,24 +118,41 @@ class ClanServerManager : PluginBase {
 
     void AddActiveClan(ref ActiveClan clan, PlayerBase player) {
         bool found = false;
-        foreach (ActiveClan c : activeClans) {
+        foreach (ActiveClan c : arrayActiveClans) {
             if (c.GetCaseName() == clan.GetCaseName()) {
                 clan = c;
                 found = true;
+                break;
             }
         }
         if (!found) {
-            clan.Verify();
             clan.InitTicker();
-            activeClans.Insert(clan);
+            arrayActiveClans.Insert(clan);
         }
-        clan.AddActivePlayer(player);
+        clan.AddTracker(player);
+        mapPlayerActiveClan.Set(player.GetIdentity(), clan);
     }
 
-    void RemoveFromActiveClan(PlayerBase player) { }
+    void RemoveFromActiveClan(PlayerBase player) {
+        ref ActiveClan clan;
 
-    private void RemoveActiveClan(ref Clan clan) {
-        activeClans.RemoveItem(clan);
+        if (mapPlayerActiveClan.Find(player.GetIdentity(), clan)) {
+            if (clan) {
+                clan.RemoveTracker(player);
+
+                if (clan.GetTrackers().Count() == 0) {
+                    clan.Save();
+                    arrayActiveClans.RemoveItem(clan);
+                } else {
+                    clan.SendRPC();
+                }
+            }
+            mapPlayerActiveClan.Remove(player.GetIdentity());
+        }
+    }
+
+    private void RemoveActiveClan(ref ActiveClan clan) {
+        arrayActiveClans.RemoveItem(clan);
     }
 
     private ClanPlayer GetClanPlayer(string playerId) {
@@ -210,14 +203,14 @@ class ClanServerManager : PluginBase {
     }
 
     ref array<ref ActiveClan> GetActiveClans() {
-        return activeClans;
+        return arrayActiveClans;
     }
     
     ref ActiveClan GetActiveClanByName(string name) {
         ref ActiveClan clan;
         name.ToLower();
 
-        foreach (ActiveClan c : activeClans) {
+        foreach (ActiveClan c : arrayActiveClans) {
             if (c.GetCaseName() == name) {
                 clan = c;
                 break;

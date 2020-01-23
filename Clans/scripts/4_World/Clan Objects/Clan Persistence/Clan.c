@@ -1,24 +1,27 @@
-class Clan {
-    protected int funds, rank, yearLastActive, monthLastActive, dayLastActive;
-    protected string ownerName, ownerId, clanName;
+class Clan : ClanBase {
+    protected int funds, yearLastActive, monthLastActive, dayLastActive;
+    protected string ownerName, ownerId;
     protected ref array<ref ClanMember> members;
 
     void Clan(string id, string pName, string name) {
-        ref ClanMember member = new ClanMember(pName, id);
+        ref ClanMember member = new ClanMember(pName, id, 0);
         members = new array<ref ClanMember>();
         ownerId = id;
         ownerName = pName;
         clanName = name;
         rank = 0;
-        member.SetRank(0);
         members.Insert(member);
     }
 
     void AddFunds(int amount) {
+        if (!GetGame().IsServer() || !GetGame().IsMultiplayer()) { return; }
+
         funds += amount;
     }
 
     void RemoveFunds(int amount) {
+        if (!GetGame().IsServer() || !GetGame().IsMultiplayer()) { return; }
+        
         funds -= amount;
 
         if (funds < 0) {
@@ -29,7 +32,7 @@ class Clan {
     void AddMember(string name, string id) {
         if (!GetGame().IsServer() || !GetGame().IsMultiplayer()) { return; }
         if (/*!IsMember(id)*/true) {
-            ref ClanMember member = new ClanMember(name, id);
+            ref ClanMember member = new ClanMember(name, id, 1);
 
             members.Insert(member);
             Save();
@@ -89,6 +92,7 @@ class Clan {
         if (!GetGame().IsServer() || !GetGame().IsMultiplayer()) { return false; }
 
         bool foundOwner = false;
+        ref array<ref ClanMemberRank> ranks = GetClanManager().GetConfig().GetRanks();
 
         if (!VerifyDate()) {
             return false;
@@ -96,15 +100,34 @@ class Clan {
         foreach (ClanMember member : members) {
             if (member.GetId() == ownerId) {
                 foundOwner = true;
-            } else if (member.GetId() != ownerId) {
-                if (member.GetRank() == 0) {
-                    // SET RANK TO LOWEST;
-                    member.SetRank(12783);
+            } else {
+                int mRank = member.GetRank();
+                int lowestRank = ranks[ranks.Count() - 1].GetRank();
+
+                if (mRank == 0) {
+                    member.SetRank(lowestRank);
+                } else {
+                    if (!GetClanManager().GetConfig().FindRank(mRank)) {
+                        bool rankSet = false;
+
+                        foreach (ClanMemberRank r : ranks) {
+                            if (r) {
+                                if (mRank < r.GetRank()) {
+                                    member.SetRank(r.GetRank());
+                                    rankSet = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (!rankSet) {
+                            member.SetRank(lowestRank);
+                        }
+                    }
                 }
             }
         }
         if (!foundOwner) {
-            ref ClanMember owner = new ClanMember(ownerName, ownerId);
+            ref ClanMember owner = new ClanMember(ownerName, ownerId, 0);
             members.Insert(owner);
         }
         Save();
@@ -120,21 +143,11 @@ class Clan {
         JsonFileLoader<Clan>.JsonSaveFile(clanDir, Clan.Cast(this));
     }
 
-    void GetLastTimestamp(out int y, out int m, out int d) {
-        y = yearLastActive;
-        m = monthLastActive;
-        d = dayLastActive;
-    }
-
-    void SetRank(int r) {
-        rank = r;
-    }
-
     private ref ClanMember GetMember(string id) {
         ref ClanMember member;
 
         foreach (ClanMember m : members) {
-            if (member.GetId() == id) {
+            if (m.GetId() == id) {
                 member = m;
                 break;
             }
@@ -143,42 +156,17 @@ class Clan {
     }
 
     bool IsMember(string playerId) {
-        bool found = false;
-        bool foundOwner = false;
-
-        foreach (ClanMember member : members) {
-            if (member.GetId() == playerId) {
-                found = true;
-                break;
-            } else if (playerId == ownerId) {
-                foundOwner = true;
-            }
+        if (GetMember(playerId)) {
+            return true;
         }
-        if (!foundOwner) {
-            ref ClanMember owner = new ClanMember(ownerName, ownerId);
-        }
-        return found;
+        return false;
     }
 
     int GetFunds() {
         return funds;
     }
 
-    int GetRank() {
-        return rank;
-    }
-
     string GetOwnerId() {
         return ownerId;
-    }
-
-    string GetName() {
-        return clanName;
-    }
-
-    string GetCaseName() {
-        string caseName = clanName;
-        caseName.ToLower();
-        return caseName;
     }
 }

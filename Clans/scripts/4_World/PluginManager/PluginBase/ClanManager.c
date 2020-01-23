@@ -1,19 +1,21 @@
 // Separate into client and server manager and have base functions a part of the clanmanager. Split things a part from there.
 
 class ClanManager : PluginBase {
-    private ref array<ref ClanUser> playerList;
+    private ref array<ref ClanUser> arrayPlayerList;
+    private ref array<ref ClanBase> arrayClanLeaderboard;
     private ref ClanConfig config;
     // In here store shit that'll be used client/server side. For instance, if I need a player list, or clan leaderboard. That kind of shit
 
     void ClanManager() {
-        playerList = new array<ref ClanUser>();
+        arrayPlayerList = new array<ref ClanUser>();
+        arrayClanLeaderboard = new array<ref ClanBase>();
     }
 
     void SetPlayerList(ref array<ref ClanUser> list) {
         if (GetGame().IsServer() && GetGame().IsMultiplayer()) { return; }
 
-        playerList = list;
-        playerList.Debug();
+        arrayPlayerList = list;
+        arrayPlayerList.Debug();
     }
 
     void AddOnlinePlayer(string name = "", string id = "", PlayerBase player = NULL) {
@@ -23,12 +25,12 @@ class ClanManager : PluginBase {
             id = player.GetIdentity().GetPlainId();
             name = player.GetIdentity().GetName();
 
-            if (playerList.Count() > 0) {
-                auto arrayParams = new Param1<ref array<ref ClanUser>>(playerList);
+            if (arrayPlayerList.Count() > 0) {
+                auto arrayParams = new Param1<ref array<ref ClanUser>>(arrayPlayerList);
                 GetGame().RPCSingleParam(player, ClanRPCEnum.ClientReceivePlayerList, arrayParams, true, player.GetIdentity());
             }
         }
-        foreach (ClanUser user : playerList) {
+        foreach (ClanUser user : arrayPlayerList) {
             if (user.GetId() == id) {
                 found = true;
                 break;
@@ -36,8 +38,8 @@ class ClanManager : PluginBase {
         }
         //if (!found) {
             ref ClanUser newUser = new ClanUser(name, id);
-            playerList.Insert(newUser);
-            //playerList.Debug();
+            arrayPlayerList.Insert(newUser);
+            //arrayPlayerList.Debug();
 
             if (!GetGame().IsServer() || !GetGame().IsMultiplayer()) { return; }
 
@@ -50,10 +52,10 @@ class ClanManager : PluginBase {
         if (player) {
             id = player.GetIdentity().GetPlainId();
         }
-        foreach (ClanUser user : playerList) {
+        foreach (ClanUser user : arrayPlayerList) {
             if (user.GetId() == id) {
-                playerList.RemoveItem(user);
-                playerList.Debug();
+                arrayPlayerList.RemoveItem(user);
+                arrayPlayerList.Debug();
 
                 if (!GetGame().IsServer() || !GetGame().IsMultiplayer()) { return; }
 
@@ -67,12 +69,45 @@ class ClanManager : PluginBase {
         config = c;
     }
 
+    void SetLeaderboard(ref array<ref ClanBase> leaderboard) {
+        arrayClanLeaderboard = leaderboard;
+        //arrayClanLeaderboard.Debug();
+    }
+
+    void SortClan(ClanBase clan) {
+        if (!GetGame().IsServer() || !GetGame().IsMultiplayer()) { return; }
+
+        int count = arrayClanLeaderboard.Count();
+        bool inserted = false;
+
+        if (count < 1) {
+            arrayClanLeaderboard.Insert(clan);
+        } else {
+            for (int i = 0; i < count; i++) {
+                ref ClanBase c = arrayClanLeaderboard[i];
+
+                if (c.GetRank() < clan.GetRank()) {
+                    arrayClanLeaderboard.InsertAt(clan, i);
+                    inserted = true;
+                    break;
+                }
+            }
+            if (!inserted) {
+                arrayClanLeaderboard.Insert(clan);
+            }
+        }
+    }
+
     ref ClanConfig GetConfig() {
         return config;
     }
 
     ref array<ref ClanUser> GetPlayerList() {
-        return playerList;
+        return arrayPlayerList;
+    }
+
+    ref array<ref ClanBase> GetClanLeaderboard() {
+        return arrayClanLeaderboard;
     }
 }
 
