@@ -1,0 +1,16 @@
+MetaFileClass {
+ Name "{C45025998CB7BD23}Clans/layouts/chevron.edds"
+ Author "bryanpc"
+ ChangeDate -725866435
+ Configurations {
+  TGAResourceClass PC {
+   SourceFile "chevron.tga"
+  }
+  TGAResourceClass XBOX_ONE : PC {
+  }
+  TGAResourceClass PS4 : PC {
+  }
+  TGAResourceClass LINUX : PC {
+  }
+ }
+}

@@ -2,7 +2,7 @@ class ClanCreateMenu : ClanMenu {
 	protected ref Widget inputRoot, createRoot, inviteRoot;
 	protected ref TextWidget txtBox, txtPlayerList, txtClanName;
 	protected ref EditBoxWidget editBox;
-	protected ref ButtonWidget btnManageClan, btnJoinClan, btnInviteClan, btnCreateClan, btnAccept, btnDecline;
+	protected ref ButtonWidget btnManageClan, btnInviteClan, btnCreateClan, btnAccept, btnDecline;
 	protected ref GridSpacerWidget gridPlayerList, gridLeaderBoard;
 	private ref array<ref ClanUser> playerList;
 	private ref array<ref ClanPlayerListGrid> arrayGridPlayerList;
@@ -24,7 +24,6 @@ class ClanCreateMenu : ClanMenu {
 		txtPlayerList = TextWidget.Cast(wRoot.FindAnyWidget("txtPlayerList"));
 		btnCreateClan = ButtonWidget.Cast(wRoot.FindAnyWidget("btnCreateClan"));
 		btnManageClan = ButtonWidget.Cast(wRoot.FindAnyWidget("btnManageClan"));
-		btnJoinClan = ButtonWidget.Cast(wRoot.FindAnyWidget("btnJoinClan"));
 		btnInviteClan = ButtonWidget.Cast(wRoot.FindAnyWidget("btnInviteToClan"));
 		gridPlayerList = GridSpacerWidget.Cast(wRoot.FindAnyWidget("gridPlayerList"));
 		gridLeaderBoard = GridSpacerWidget.Cast(wRoot.FindAnyWidget("gridLeaderBoard"));
@@ -224,7 +223,6 @@ class ClanCreateMenu : ClanMenu {
 			btnManageClan.Show(false);
 			btnInviteClan.Show(false);
 		} else {
-			btnJoinClan.Show(false);
 			btnCreateClan.Show(false);
 		}
 	}

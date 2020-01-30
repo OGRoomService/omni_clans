@@ -81,8 +81,8 @@ class ClanServerRPCHandler : PluginBase {
                         if (clan) {
                             if (selectedOption == "btnAcceptInvite" && clan.IsPlayerInvited(playerId)) {
                                 clan.AddMember(player.GetIdentity().GetName(), playerId);
+                                clan.AddTracker(player);
                             }
-                            clan.AddTracker(player);
                             clan.RemoveInvitation(playerId);
                         }
                     }

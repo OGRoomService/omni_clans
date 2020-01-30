@@ -1,11 +1,91 @@
 FrameWidgetClass rootFrame {
- position 0.00223 0
+ position 0.0022 0
  size 1 1
  hexactpos 0
  vexactpos 0
  hexactsize 0
  vexactsize 0
  {
+  PanelWidgetClass rootInvite {
+   visible 0
+   ignorepointer 1
+   color 0 0 0 1
+   position 651 0
+   size 350 200
+   halign center_ref
+   valign center_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   style rover_sim_colorable
+   {
+    PanelWidgetClass pnlInvOutline {
+     ignorepointer 1
+     color 0.5608 0.0706 0.0706 1
+     position 0 0
+     size 1 1
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     style Outline
+    }
+    TextWidgetClass txtHeader {
+     ignorepointer 1
+     position 0 10
+     size 48 38
+     halign center_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     text "Accept Invite?"
+     "size to text h" 1
+     "size to text v" 0
+    }
+    TextWidgetClass txtClanName {
+     ignorepointer 1
+     position 0 50
+     size 48 38
+     halign center_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     "size to text h" 1
+     "size to text v" 0
+    }
+    ButtonWidgetClass btnAcceptInvite {
+     color 0.0706 0.5608 0.1922 1
+     position -75 35
+     size 100 48
+     halign center_ref
+     valign bottom_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     style DayZDefaultButton
+     text "YES"
+     text_proportion 0.85
+    }
+    ButtonWidgetClass btnDeclineInvite {
+     color 0.5608 0.0706 0.0706 1
+     position 75 35
+     size 100 48
+     halign center_ref
+     valign bottom_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     style DayZDefaultButton
+     text "NO"
+     text_proportion 0.85
+    }
+   }
+  }
   PanelWidgetClass rootCreate {
    visible 1
    color 0 0 0 1
@@ -21,8 +101,8 @@ FrameWidgetClass rootFrame {
    {
     ButtonWidgetClass btnCreateClan {
      color 0.5608 0.0706 0.0706 1
-     position 177 72
-     size 153 48
+     position 20 124
+     size 310 48
      halign right_ref
      valign bottom_ref
      hexactpos 1
@@ -48,23 +128,9 @@ FrameWidgetClass rootFrame {
      text_proportion 0.45
      switch normal
     }
-    ButtonWidgetClass btnJoinClan {
-     color 0.5608 0.0706 0.0706 1
-     position 20 72
-     size 153 48
-     halign right_ref
-     valign bottom_ref
-     hexactpos 1
-     vexactpos 1
-     hexactsize 1
-     vexactsize 1
-     style DayZDefaultButton
-     text "Join Clan"
-     text_proportion 0.45
-    }
     ButtonWidgetClass btnInviteToClan {
      color 0.5608 0.0706 0.0706 1
-     position 20 130
+     position 20 72
      size 310 48
      halign right_ref
      valign bottom_ref
@@ -270,87 +336,6 @@ FrameWidgetClass rootFrame {
      text "Enter Clan Name"
      "size to text h" 1
      "size to text v" 0
-    }
-   }
-  }
-  PanelWidgetClass rootInvite {
-   visible 0
-   ignorepointer 1
-   color 0 0 0 1
-   position 651 0
-   size 350 200
-   halign center_ref
-   valign center_ref
-   hexactpos 1
-   vexactpos 1
-   hexactsize 1
-   vexactsize 1
-   style rover_sim_colorable
-   {
-    PanelWidgetClass pnlInvOutline {
-     ignorepointer 1
-     color 0.5608 0.0706 0.0706 1
-     position 0 0
-     size 1 1
-     hexactpos 0
-     vexactpos 0
-     hexactsize 0
-     vexactsize 0
-     style Outline
-    }
-    TextWidgetClass txtHeader {
-     ignorepointer 1
-     position 0 10
-     size 48 38
-     halign center_ref
-     hexactpos 1
-     vexactpos 1
-     hexactsize 1
-     vexactsize 1
-     text "Accept Invite?"
-     "size to text h" 1
-     "size to text v" 0
-    }
-    TextWidgetClass txtClanName {
-     ignorepointer 1
-     position 0 50
-     size 48 38
-     halign center_ref
-     hexactpos 1
-     vexactpos 1
-     hexactsize 1
-     vexactsize 1
-     text "reeeee"
-     "size to text h" 1
-     "size to text v" 0
-    }
-    ButtonWidgetClass btnAcceptInvite {
-     color 0.0706 0.5608 0.1922 1
-     position -75 35
-     size 100 48
-     halign center_ref
-     valign bottom_ref
-     hexactpos 1
-     vexactpos 1
-     hexactsize 1
-     vexactsize 1
-     style DayZDefaultButton
-     text "YES"
-     text_proportion 0.85
-    }
-    ButtonWidgetClass btnDeclineInvite {
-     color 0.5608 0.0706 0.0706 1
-     position 75 35
-     size 100 48
-     halign center_ref
-     valign bottom_ref
-     hexactpos 1
-     vexactpos 1
-     hexactsize 1
-     vexactsize 1
-     style DayZDefaultButton
-     text "NO"
-     text_proportion 0.85
     }
    }
   }

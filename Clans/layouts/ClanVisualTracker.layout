@@ -1,0 +1,39 @@
+FrameWidgetClass rootFrame {
+ clipchildren 0
+ ignorepointer 1
+ size 26 18
+ hexactpos 1
+ vexactpos 1
+ hexactsize 1
+ vexactsize 1
+ {
+  ImageWidgetClass imgChevron {
+   inheritalpha 1
+   ignorepointer 1
+   size 26 18
+   halign center_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   imageTexture "{C45025998CB7BD23}Clans/layouts/chevron.edds"
+   mode blend
+   "src alpha" 1
+   stretch 1
+  }
+  TextWidgetClass txtPlayerName {
+   inheritalpha 1
+   ignorepointer 1
+   position 0 -14
+   size 100 14
+   halign center_ref
+   valign bottom_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   text "yeeter skeeter"
+   "size to text h" 1
+  }
+ }
+}

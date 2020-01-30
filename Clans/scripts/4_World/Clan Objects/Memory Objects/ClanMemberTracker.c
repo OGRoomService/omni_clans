@@ -8,12 +8,20 @@ class ClanMemberTracker {
     private int posUpdateInterval = GetClanManager().GetConfig().GetTrackerPositionSens();
     private int posUpdateSens = GetClanManager().GetConfig().GetTrackerPositionSens();
     private int lastPosUpdate;
-    private string pId, pPlainId;
+    private string playerId, playerPlainId, playerName;
 
-    void ClanMemberTracker(PlayerBase p) {
-        player = p;
-        pId = player.GetIdentity().GetId();
-        pPlainId = player.GetIdentity().GetPlainId();
+    void ClanMemberTracker(string pId, string pPlainId, string pName, float initHP, float initBlood, float initShock, vector pos) {
+        playerId = pId;
+        playerPlainId = pPlainId;
+        playerName = pName;
+        playerPos = pos;
+        hp = initHP;
+        blood = initBlood;
+        shock = initShock;
+    }
+
+    void Init() {
+        if (!GetGame().IsServer() || !GetGame().IsMultiplayer()) { return; }
         maxHP = player.GetMaxHealth("", "Health");
         maxBlood = player.GetMaxHealth("", "Blood");
         maxShock = player.GetMaxHealth("", "Shock");
@@ -27,7 +35,6 @@ class ClanMemberTracker {
 
     void UpdateValues() {
         if (!GetGame().IsServer() || !GetGame().IsMultiplayer()) { return; }
-
         hp = player.GetHealth("", "Health");
         blood = player.GetHealth("", "Blood");
         shock = player.GetHealth("", "Shock");
@@ -36,6 +43,46 @@ class ClanMemberTracker {
         Print("health=" + hp);
         Print("blood=" + blood);
         Print("shock=" + shock);
+    }
+
+    void SetPlayer(PlayerBase p) {
+        player = p;
+    }
+
+    void SetValues(float updateHP, float updateBlood, float updateShock, vector updatePos) {
+        if (GetGame().IsServer() && GetGame().IsMultiplayer()) { return; }
+        hp = updateHP;
+        blood = updateBlood;
+        shock = updateShock;
+        playerPos = updatePos;
+    }
+
+    void ClientUpdatePlayerBase() {
+        if (playerPlainId == GetClanClientManager().GetPlainId()) {
+            GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).RemoveByName(this, "ClientUpdatePlayerBase");
+            return;
+        }
+        if (player) { return; }
+        array<Man> playerList = new array<Man>();
+        playerList = ClientData.m_PlayerBaseList;
+        
+        foreach (Man man : playerList) {
+            PlayerBase playerBase = PlayerBase.Cast(man);
+
+            if (playerBase) {
+                if (!playerBase.GetIdentity()) {
+                    if (playerBase.GetType() == playerName) {
+                        SetPlayer(playerBase);
+                        break;
+                    }
+                } else {
+                    if (playerBase.GetIdentity().GetId() == playerId) {
+                        SetPlayer(playerBase)
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     PlayerBase GetPlayer() {
@@ -47,89 +94,79 @@ class ClanMemberTracker {
     }
 
     string GetPlainId() {
-        return pPlainId;
+        return playerPlainId;
     }
 
     string GetId() {
-        return pId;
+        return playerId;
+    }
+
+    string GetName() {
+        return playerName;
+    }
+
+    float GetHealth(bool normalize = false) {
+        if (normalize) {
+            return ((hp / maxHP) * 100);
+        }
+        return hp;
+    }
+
+    float GetBlood(bool normalize = false) {
+        if (normalize) {
+            return ((blood / maxBlood) * 100);
+        }
+        return blood;
+    }
+
+    float GetShock(bool normalize = false) {
+        if (normalize) {
+            return ((shock / maxShock) * 100);
+        }
+        return shock;
+    }
+
+    vector GetPosition() {
+        return playerPos;
     }
 
     bool NeedsClanSynch() {
         if (!GetGame().IsServer() || !GetGame().IsMultiplayer()) { return false; }
         
         float currHP = (player.GetHealth("", "Health") / maxHP);
-        float diff = Math.AbsFloat(currHP - lastHPUpdate);
-        bool needsSynch = false;
+        float currBlood = (player.GetHealth("", "Blood") / maxBlood);
+        float currShock  = (player.GetHealth("", "Shock") / maxShock);
+        float diffHP = Math.AbsFloat(currHP - lastHPUpdate);
+        float diffBlood = Math.AbsFloat(currBlood - lastBloodUpdate);
+        float diffShock = Math.AbsFloat(currShock - lastShockUpdate);
+        bool needsSync = false;
         vector pos;
+        lastPosUpdate++;
 
         if (lastPosUpdate >= posUpdateInterval) {
             pos = player.GetPosition();
 
             if (vector.Distance(pos, playerPos) > posUpdateSens) {
-                needsSynch = true;
-                lastPosUpdate = 0;
+                needsSync = true;
             }
+            lastPosUpdate = 0;
         }
-        if (diff > (updateSens / 100)) {
+        if (diffHP > (updateSens / 100)) {
             lastHPUpdate = currHP;
-            needsSynch = true;
+            needsSync = true;
         }
-        float currBlood = (player.GetHealth("", "Blood") / maxBlood);
-        diff = Math.AbsFloat(currBlood - lastBloodUpdate);
-
-        if (diff > (updateSens / 100)) {
+        if (diffBlood > (updateSens / 100)) {
             lastBloodUpdate = currBlood;
-            needsSynch = true;
+            needsSync = true;
         }
-        float currShock  = (player.GetHealth("", "Shock") / maxShock);
-        diff = Math.AbsFloat(currShock - lastShockUpdate);
-        
-        if (diff > (updateSens / 100)) {
+        if (diffShock > (updateSens / 100)) {
             lastShockUpdate = currShock;
-            needsSynch = true;
+            needsSync = true;
         }
-        lastPosUpdate++;
-
-        if (needsSynch) {
+        if (needsSync) {
             UpdateValues();
             return true;
         }
         return false;
-    }
-
-    float GetCVal(string type, bool normal = false) {
-        type.ToLower();
-
-        switch(type) {
-            case "health":
-            {
-                if (normal) {
-                    return ((hp / maxHP) * 100);
-                }
-                return hp;
-                break;
-            }
-            case "blood":
-            {
-                if (normal) {
-                    return ((blood / maxBlood) * 100);
-                }
-                return blood;
-                break;
-            }
-            case "shock":
-            {
-                if (normal) {
-                    return ((shock / maxShock) * 100);
-                }
-                return shock;
-                break;
-            }
-        }
-        return -1;
-    }
-
-    vector GetPosition() {
-        return playerPos;
     }
 }

@@ -1,17 +1,27 @@
 class ClanClientManager : PluginBase {
     private ref ActiveClan activeClan;
+    private ref ClanHud activeClanHud;
     private string plainId, clanInviteName;
 
     ref ActiveClan GetClan() {
         return activeClan;
     }
 
+    ref ClanHud GetHud() {
+        return activeClanHud;
+    }
+
     void SetActiveClan(ref ActiveClan clan) {
         if (activeClan) {
             delete activeClan;
         }
+        if (activeClanHud) {
+            delete activeClanHud;
+        }
         activeClan = clan;
         activeClan.Test();
+        activeClan.Init();
+        activeClanHud = new ClanHud(activeClan);
     }
 
     void SetClanInvite(string clanName) {

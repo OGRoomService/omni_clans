@@ -126,11 +126,26 @@ class ClanServerManager : PluginBase {
             }
         }
         if (!found) {
-            clan.InitTicker();
+            clan.Init();
             arrayActiveClans.Insert(clan);
         }
-        clan.AddTracker(player);
+        auto params = new Param1<ref ActiveClan>(clan);
+        GetGame().RPCSingleParam(player, ClanRPCEnum.ClientReceiveClan, params, true, player.GetIdentity());
+
         mapPlayerActiveClan.Set(player.GetIdentity(), clan);
+        PlayerBase testAI1 = PlayerBase.Cast(GetGame().CreateObject("SurvivorM_Mirek", "11993.6 140 12563.2"));
+        PlayerBase testAI2 = PlayerBase.Cast(GetGame().CreateObject("SurvivorM_Boris", "11999.6 140 12566.2"));
+        PlayerBase testAI3 = PlayerBase.Cast(GetGame().CreateObject("SurvivorM_Cyril", "11973.6 140 12569.2"));
+        PlayerBase testAI4 = PlayerBase.Cast(GetGame().CreateObject("SurvivorM_Denis", "11983.6 140 12572.2"));
+        PlayerBase testAI5 = PlayerBase.Cast(GetGame().CreateObject("SurvivorM_Niki", "12000.6 140 12576.2"));
+        clan.AddTracker(player);
+        clan.AddTracker(testAI1, "", "", testAI1.GetType());
+        clan.AddTracker(testAI2, "", "", testAI2.GetType());
+        clan.AddTracker(testAI3, "", "", testAI3.GetType());
+        clan.AddTracker(testAI4, "", "", testAI4.GetType());
+        clan.AddTracker(testAI5, "", "", testAI5.GetType());
+        clan.Test();
+        // 11993.6 140 12563.2
     }
 
     void RemoveFromActiveClan(PlayerBase player) {
@@ -138,13 +153,14 @@ class ClanServerManager : PluginBase {
 
         if (mapPlayerActiveClan.Find(player.GetIdentity(), clan)) {
             if (clan) {
-                clan.RemoveTracker(player);
+                string playerId = player.GetIdentity().GetId()
+                clan.RemoveTracker(playerId);
 
                 if (clan.GetTrackers().Count() == 0) {
                     clan.Save();
                     arrayActiveClans.RemoveItem(clan);
                 } else {
-                    clan.SendRPC();
+                    clan.RemoveTrackerRPC(playerId);
                 }
             }
             mapPlayerActiveClan.Remove(player.GetIdentity());
@@ -153,26 +169,6 @@ class ClanServerManager : PluginBase {
 
     private void RemoveActiveClan(ref ActiveClan clan) {
         arrayActiveClans.RemoveItem(clan);
-    }
-
-    private ClanPlayer GetClanPlayer(string playerId) {
-        string playerDataDir = playerDirectory + "\\" + playerId + playerDataFile + fileExtension;
-        ClanPlayer player;
-
-        if (FileExist(playerDataDir)) {
-            JsonFileLoader<ClanPlayer>.JsonLoadFile(playerDataDir, player);
-        }
-        return player;
-    }
-
-    private ref ActiveClan GetClanByName(string name) {
-        ActiveClan clan;
-        string clanFileDir = clanDirectory + "\\" + name + fileExtension;
-
-        if (FileExist(clanFileDir)) {
-            JsonFileLoader<ActiveClan>.JsonLoadFile(clanFileDir, clan);
-        }
-        return clan;
     }
 
     bool CanCreateClan(PlayerBase player, string name, out string error) {
@@ -200,6 +196,26 @@ class ClanServerManager : PluginBase {
             }
         }
         return true;
+    }
+
+    private ClanPlayer GetClanPlayer(string playerId) {
+        string playerDataDir = playerDirectory + "\\" + playerId + playerDataFile + fileExtension;
+        ClanPlayer player;
+
+        if (FileExist(playerDataDir)) {
+            JsonFileLoader<ClanPlayer>.JsonLoadFile(playerDataDir, player);
+        }
+        return player;
+    }
+
+    private ref ActiveClan GetClanByName(string name) {
+        ActiveClan clan;
+        string clanFileDir = clanDirectory + "\\" + name + fileExtension;
+
+        if (FileExist(clanFileDir)) {
+            JsonFileLoader<ActiveClan>.JsonLoadFile(clanFileDir, clan);
+        }
+        return clan;
     }
 
     ref array<ref ActiveClan> GetActiveClans() {
