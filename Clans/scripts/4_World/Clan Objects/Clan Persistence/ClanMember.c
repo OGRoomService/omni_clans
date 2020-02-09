@@ -21,17 +21,38 @@ class ClanMember {
         rank = r;
     }
 
+    // Other logic required for promotions/demotions can be done in server-rpc handler or clan
     // Descending order hierarchy. 0 is top of chain = owner. Do not allow assignment to any other member
     void Promote() {
-        if (!GetGame().IsServer() || !GetGame().IsMultiplayer()) { return; }
-
         // PROMOTE THE USER BASED ON NEXT LOWEST IN CONFIG;
+        ref array<ref ClanMemberRank> configRanks = GetClanManager().GetConfig().GetRanks();
+        ref ClanMemberRank currentRank = GetClanManager().GetConfig().FindRank(rank);
+        int currentRankIndex = configRanks.Find(currentRank);
+
+        if (currentRankIndex == -1) {
+            // For some reason they have a non existant rank, reset to lowest rank
+            rank = configRanks[configRanks.Count() - 1].GetRank();
+        } else {
+            if (currentRankIndex != 0) {
+                rank = configRanks[currentRankIndex - 1].GetRank();
+            }
+        }
     }
 
     void Demote() {
-        if (!GetGame().IsServer() || !GetGame().IsMultiplayer()) { return; }
-
         // DEMOTE THE USER BASED ON NEXT LOWEST IN CONFIG;
+        ref array<ref ClanMemberRank> configRanks = GetClanManager().GetConfig().GetRanks();
+        ref ClanMemberRank currentRank = GetClanManager().GetConfig().FindRank(rank);
+        int configRanksCount = configRanks.Count();
+        int currentRankIndex = configRanks.Find(currentRank);
+
+        if (currentRankIndex == -1) {
+            rank = configRanks[configRanksCount - 1].GetRank();
+        } else {
+            if (currentRankIndex != (configRanksCount - 1)) {
+                rank = configRanks[currentRankIndex + 1].GetRank();
+            }
+        }
     }
 
     void AddContribution(int amount) {

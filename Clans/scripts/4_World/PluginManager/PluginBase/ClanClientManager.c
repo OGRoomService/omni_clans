@@ -12,16 +12,21 @@ class ClanClientManager : PluginBase {
     }
 
     void SetActiveClan(ref ActiveClan clan) {
+        DeleteClan();
+        
+        activeClan = clan;
+        activeClan.Test();
+        activeClan.Init();
+        activeClanHud = new ClanHud(activeClan);
+    }
+
+    void DeleteClan() {
         if (activeClan) {
             delete activeClan;
         }
         if (activeClanHud) {
             delete activeClanHud;
         }
-        activeClan = clan;
-        activeClan.Test();
-        activeClan.Init();
-        activeClanHud = new ClanHud(activeClan);
     }
 
     void SetClanInvite(string clanName) {

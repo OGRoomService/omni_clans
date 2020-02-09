@@ -1,30 +1,23 @@
 class ClanVisualTracker {
-    private ref Widget parentWidget, playerVisualTracker, playerDataWidget;
+    private ref Widget parentWidget, playerVisualTracker;
     private ref TextWidget txtPlayerName;
     private ref ImageWidget imgChevron;
     private ref ClanMemberTracker playerDataTracker;
     private bool isUpdatingVisualTracker = false;
     private bool relativeScreenSide = false; // false = left | true = right
 
-    void ClanVisualTracker(ref ClanMemberTracker tracker, Widget parent, GridSpacerWidget grid) {
-        Print("CREATING WIDGETS FOR PLAYERDATA BULLSHIT");
-        Print("tracker=" + tracker);
+    void ClanVisualTracker(ref ClanMemberTracker tracker, Widget parent) {
+        string playerName = tracker.GetName();
+        
         parentWidget = parent;
         playerDataTracker = tracker;
         playerVisualTracker = GetGame().GetWorkspace().CreateWidgets("Clans\\layouts\\ClanVisualTracker.layout", parent);
         txtPlayerName = TextWidget.Cast(playerVisualTracker.FindAnyWidget("txtPlayerName"));
-        playerDataWidget = GetGame().GetWorkspace().CreateWidgets("Clans\\layouts\\TextWidget.layout", grid);
-
         playerVisualTracker.Show(false);
-
-        string playerName = tracker.GetName();
-
-        Print("VISUAL TRACKER PLAYERNAME = " + playerName);
 
         if (playerName == string.Empty) {
             playerName = "SOME RANDOM AI";
         }
-        TextWidget.Cast(playerDataWidget).SetText(playerName);
         txtPlayerName.SetText(playerDataTracker.GetName());
         txtPlayerName.Show(false);
 
@@ -36,9 +29,6 @@ class ClanVisualTracker {
         Print("DELETING VISUAL TRACKER");
         if (playerVisualTracker) {
             playerVisualTracker.Unlink();
-        }
-        if (playerDataWidget) {
-            playerDataWidget.Unlink();
         }
     }
 
@@ -93,11 +83,6 @@ class ClanVisualTracker {
         posY = Math.Ceil(screenPos[1]);
         isUpdatingVisualTracker = true;
         angleVector = relativeScreenPos.VectorToAngles();
-
-        //Print("UPDATING VISUAL TRACKER");
-        if (playerDataTracker.GetName() == "SurvivorM_Niki") {
-            Print("relativeScreenPos=" + relativeScreenPos);
-        }
 
         if (relativeScreenPos[0] > 0 && relativeScreenPos[0] < 1 && relativeScreenPos[1] > 0 && relativeScreenPos[1] < 1 && relativeScreenPos[2] > 0) {
             if (relativeScreenPos[0] > 0 && relativeScreenPos[0] < 0.5) {

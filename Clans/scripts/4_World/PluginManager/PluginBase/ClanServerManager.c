@@ -92,12 +92,16 @@ class ClanServerManager : PluginBase {
         ClanPlayer cPlayer = new ClanPlayer(name, playerId);
 
         MakeDirectory(playerDir);
-        AddActiveClan(clan, player);
+        AddPlayerToActiveClan(clan, player);
+        for (int i = 0; i < 10; i++) {
+            int randoId = Math.RandomInt(111111111, 999999999);
+            clan.AddMember("Member " + i, "" + randoId);
+        }
         clan.Save();
         cPlayer.Save();
     }
 
-    void AddPlayerToActiveClan(PlayerBase player) {
+    void CheckPlayerForClan(PlayerBase player) {
         string playerId = player.GetIdentity().GetPlainId();
         string playerDir = playerDirectory + "\\" + playerId;
         string playerFileDir = playerDir + playerDataFile + fileExtension;
@@ -110,13 +114,13 @@ class ClanServerManager : PluginBase {
                 ActiveClan clan = GetClanByName(clanName);
 
                 if (clan && clan.IsMember(playerId)) {
-                    AddActiveClan(clan, player);
+                    AddPlayerToActiveClan(clan, player);
                 }
             }
         }
     }
-
-    void AddActiveClan(ref ActiveClan clan, PlayerBase player) {
+//AddPlayerToActiveClan
+    void AddPlayerToActiveClan(ref ActiveClan clan, PlayerBase player) {
         bool found = false;
         foreach (ActiveClan c : arrayActiveClans) {
             if (c.GetCaseName() == clan.GetCaseName()) {
@@ -129,10 +133,6 @@ class ClanServerManager : PluginBase {
             clan.Init();
             arrayActiveClans.Insert(clan);
         }
-        auto params = new Param1<ref ActiveClan>(clan);
-        GetGame().RPCSingleParam(player, ClanRPCEnum.ClientReceiveClan, params, true, player.GetIdentity());
-
-        mapPlayerActiveClan.Set(player.GetIdentity(), clan);
         PlayerBase testAI1 = PlayerBase.Cast(GetGame().CreateObject("SurvivorM_Mirek", "11993.6 140 12563.2"));
         PlayerBase testAI2 = PlayerBase.Cast(GetGame().CreateObject("SurvivorM_Boris", "11999.6 140 12566.2"));
         PlayerBase testAI3 = PlayerBase.Cast(GetGame().CreateObject("SurvivorM_Cyril", "11973.6 140 12569.2"));
@@ -145,10 +145,12 @@ class ClanServerManager : PluginBase {
         clan.AddTracker(testAI4, "", "", testAI4.GetType());
         clan.AddTracker(testAI5, "", "", testAI5.GetType());
         clan.Test();
-        // 11993.6 140 12563.2
+        mapPlayerActiveClan.Set(player.GetIdentity(), clan);
+        auto params = new Param1<ref ActiveClan>(clan);
+        GetGame().RPCSingleParam(player, ClanRPCEnum.ClientReceiveClan, params, true, player.GetIdentity());
     }
 
-    void RemoveFromActiveClan(PlayerBase player) {
+    void RemovePlayerFromActiveClan(PlayerBase player) {
         ref ActiveClan clan;
 
         if (mapPlayerActiveClan.Find(player.GetIdentity(), clan)) {
@@ -167,7 +169,17 @@ class ClanServerManager : PluginBase {
         }
     }
 
-    private void RemoveActiveClan(ref ActiveClan clan) {
+    void RemoveAllPlayersFromActiveClan(ref array<ref ClanMemberTracker> clanTrackers) {
+        foreach (ClanMemberTracker tracker : clanTrackers) {
+            PlayerBase player = tracker.GetPlayer();
+
+            if (player) {
+                mapPlayerActiveClan.Remove(player.GetIdentity());
+            }
+        }
+    }
+
+    void RemoveActiveClan(ref ActiveClan clan) {
         arrayActiveClans.RemoveItem(clan);
     }
 
@@ -220,6 +232,12 @@ class ClanServerManager : PluginBase {
 
     ref array<ref ActiveClan> GetActiveClans() {
         return arrayActiveClans;
+    }
+
+    ref ActiveClan GetActiveClanByPlayerIdentity(PlayerIdentity playerId) {
+        ref ActiveClan activeClan = mapPlayerActiveClan.Get(playerId);
+
+        return activeClan;
     }
     
     ref ActiveClan GetActiveClanByName(string name) {

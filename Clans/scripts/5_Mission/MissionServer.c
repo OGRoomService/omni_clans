@@ -6,7 +6,7 @@ modded class MissionServer {
             auto params = new Param3<string, ref ClanConfig, ref array<ref ClanBase>>(identity.GetPlainId(), GetClanManager().GetConfig(), GetClanManager().GetClanLeaderboard());
             
             GetGame().RPCSingleParam(player, ClanRPCEnum.ClientInitialize, params, true, identity);
-            GetClanServerManager().AddPlayerToActiveClan(player);
+            GetClanServerManager().CheckPlayerForClan(player);
             GetClanManager().AddOnlinePlayer("", "", player);
         }
         /* super.InvokeOnConnect(player, identity);
@@ -23,7 +23,7 @@ modded class MissionServer {
         super.InvokeOnDisconnect(player);
 
         if (player) {
-            GetClanServerManager().RemoveFromActiveClan(player);
+            GetClanServerManager().RemovePlayerFromActiveClan(player);
             GetClanManager().RemoveOnlinePlayer("", player);
         }
     }

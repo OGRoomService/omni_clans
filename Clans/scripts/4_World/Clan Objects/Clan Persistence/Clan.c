@@ -30,9 +30,10 @@ class Clan : ClanBase {
     }
 
     void AddMember(string name, string id) {
-        if (!GetGame().IsServer() || !GetGame().IsMultiplayer()) { return; }
         if (/*!IsMember(id)*/true) {
-            ref ClanMember member = new ClanMember(name, id, 1);
+            int randoRankIndex = Math.RandomInt(0, (GetClanManager().GetConfig().GetRanks().Count() - 1));
+            int randoRank = GetClanManager().GetConfig().GetRanks()[randoRankIndex].GetRank();
+            ref ClanMember member = new ClanMember(name, id, randoRank);
 
             members.Insert(member);
             Save();
@@ -40,13 +41,34 @@ class Clan : ClanBase {
     }
 
     void RemoveMember(string id) {
-        if (!GetGame().IsServer() || !GetGame().IsMultiplayer()) { return; }
         if (id == ownerId) { return; }
 
         ref ClanMember member = GetMember(id);
 
         if (member) {
             members.RemoveItem(member);
+            Save();
+        }
+    }
+
+    void PromoteMember(string playerId) {
+        if (playerId == ownerId) { return; }
+
+        ref ClanMember member = GetMember(playerId);
+
+        if (member) {
+            member.Promote();
+            Save();
+        }
+    }
+
+    void DemoteMember(string playerId) {
+        if (playerId == ownerId) { return; }
+
+        ref ClanMember member = GetMember(playerId);
+
+        if (member) {
+            member.Demote();
             Save();
         }
     }
@@ -143,7 +165,7 @@ class Clan : ClanBase {
         JsonFileLoader<Clan>.JsonSaveFile(clanDir, Clan.Cast(this));
     }
 
-    private ref ClanMember GetMember(string id) {
+    ref ClanMember GetMember(string id) {
         ref ClanMember member;
 
         foreach (ClanMember m : members) {
@@ -153,6 +175,10 @@ class Clan : ClanBase {
             }
         }
         return member;
+    }
+
+    ref array<ref ClanMember> GetMembers() {
+        return members;
     }
 
     bool IsMember(string playerId) {

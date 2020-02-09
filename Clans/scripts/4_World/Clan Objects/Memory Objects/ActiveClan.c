@@ -14,7 +14,7 @@ class ActiveClan : Clan {
     void Init() {
         if (GetGame().IsServer() && GetGame().IsMultiplayer()) {
             GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).Remove(SyncTrackers);
-            GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(SyncTrackers, GetClanManager().GetConfig().GetTrackerUpdateInterval() * 1000, true);
+            GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(SyncTrackers, GetClanManager().GetConfig().GetTrackerPositionUpdateInterval() * 1000, true);
         } else {
             foreach (ClanMemberTracker tracker : arrayTrackers) {
                 GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).RemoveByName(tracker, "ClientUpdatePlayerBase");
@@ -23,17 +23,80 @@ class ActiveClan : Clan {
         }
     }
 
-    void AddTracker(PlayerBase player = NULL, string playerId = "", string playerPlainId = "", string playerName = "", float hp = 0, float blood = 0, float shock = 0, vector pos = "0 0 0") {
-        Print("Adding player tracker!");
-        Print("playerId=" + playerId);
-        Print("playerPlainId=" + playerId);
-        Print("playerName=" + playerId);
-        Print("e");
-        Print("e");
-        Print("e");
-        Print("e");
-        Print("e");
-        Print("e");
+    void SetFunds(int amount) {
+        if (GetGame().IsServer() && GetGame().IsMultiplayer()) { return; }
+
+        funds = amount;
+    }
+
+    override void AddFunds(int amount) {
+        if (!GetGame().IsServer() || !GetGame().IsMultiplayer()) { return; }
+
+        super.AddFunds(amount);
+        SetFundsRPC();
+    }
+
+    override void RemoveFunds(int amount) {
+        if (!GetGame().IsServer() || !GetGame().IsMultiplayer()) { return; }
+
+        super.AddFunds(amount);
+        SetFundsRPC();
+    }
+
+    override void AddMember(string name, string id) {
+        super.AddMember(name, id);
+
+        if (!GetGame().IsServer() || !GetGame().IsMultiplayer()) { return; }
+        foreach (ClanMemberTracker tracker : arrayTrackers) {
+            if (tracker.GetIdentity()) {
+                Print("sending promote member RPC " + tracker.GetPlainId());
+                auto params = new Param2<string, string>(name, id);
+                GetGame().RPCSingleParam(tracker.GetPlayer(), ClanRPCEnum.ClientAddClanMember, params, true, tracker.GetIdentity());
+            }
+        }
+    }
+
+    override void RemoveMember(string id) {
+        super.RemoveMember(id);
+        RemoveTracker(id);
+
+        if (!GetGame().IsServer() || !GetGame().IsMultiplayer()) { return; }
+        foreach (ClanMemberTracker tracker : arrayTrackers) {
+            if (tracker.GetIdentity()) {
+                Print("sending promote member RPC " + tracker.GetPlainId());
+                auto params = new Param1<string>(id);
+                GetGame().RPCSingleParam(tracker.GetPlayer(), ClanRPCEnum.ClientRemoveClanMember, params, true, tracker.GetIdentity());
+            }
+        }
+    }
+
+    override void PromoteMember(string playerId) {
+        super.PromoteMember(playerId);
+
+        if (!GetGame().IsServer() || !GetGame().IsMultiplayer()) { return; }
+        foreach (ClanMemberTracker tracker : arrayTrackers) {
+            if (tracker.GetIdentity()) {
+                Print("sending promote member RPC " + tracker.GetPlainId());
+                auto params = new Param1<string>(playerId);
+                GetGame().RPCSingleParam(tracker.GetPlayer(), ClanRPCEnum.ClientPromoteClanMember, params, true, tracker.GetIdentity());
+            }
+        }
+    }
+
+    override void DemoteMember(string playerId) {
+        super.DemoteMember(playerId);
+
+        if (!GetGame().IsServer() || !GetGame().IsMultiplayer()) { return; }
+        foreach (ClanMemberTracker tracker : arrayTrackers) {
+            if (tracker.GetIdentity()) {
+                Print("sending promote member RPC " + tracker.GetPlainId());
+                auto params = new Param1<string>(playerId);
+                GetGame().RPCSingleParam(tracker.GetPlayer(), ClanRPCEnum.ClientDemoteClanMember, params, true, tracker.GetIdentity());
+            }
+        }
+    }
+
+    void AddTracker(PlayerBase player = NULL, string playerId = "", string playerPlainId = "", string playerName = "", vector pos = "0 0 0") {
         if (GetGame().IsServer() && GetGame().IsMultiplayer()) {
             if (player.GetIdentity()) {
                 PlayerIdentity identity = player.GetIdentity()
@@ -42,11 +105,8 @@ class ActiveClan : Clan {
                 playerName = identity.GetName();
             }
             pos = player.GetPosition();
-            hp = player.GetHealth("", "Health");
-            blood = player.GetHealth("", "Blood");
-            shock = player.GetHealth("", "Shock");
         }
-        ClanMemberTracker tracker = new ClanMemberTracker(playerId, playerPlainId, playerName, hp, blood, shock, pos);
+        ClanMemberTracker tracker = new ClanMemberTracker(playerId, playerPlainId, playerName, pos);
 
         //RemoveTracker(playerId);
         arrayTrackers.Insert(tracker);
@@ -59,7 +119,7 @@ class ActiveClan : Clan {
         tracker.SetPlayer(player);
         tracker.Init();
         // Send RPC for client to do the same shit
-        AddTrackerRPC(playerId, playerPlainId, playerName, hp, blood, shock, pos);
+        AddTrackerRPC(playerId, playerPlainId, playerName, pos);
     }
 
     void RemoveTracker(string playerId) {
@@ -82,11 +142,11 @@ class ActiveClan : Clan {
         }
     }
 
-    void UpdateTracker(string playerId, float hp, float blood, float shock, vector pos) {
+    void UpdateTracker(string playerId, vector pos) {
         if (GetGame().IsServer() && GetGame().IsMultiplayer()) { return; }
         foreach (ClanMemberTracker tracker : arrayTrackers) {
             if (tracker.GetId() == playerId) {
-                tracker.SetValues(hp, blood, shock, pos);
+                tracker.SetValues(pos);
                 break;
             }
         }
@@ -120,17 +180,17 @@ class ActiveClan : Clan {
             if (tracker.NeedsClanSynch()) {
                 // Send rpc to sync tracker
                 Print("CLIENT NEEDS UPDATE FROM TRACKER");
-                UpdateTrackerRPC(tracker.GetId(), tracker.GetHealth(), tracker.GetBlood(), tracker.GetShock(), tracker.GetPosition());
+                UpdateTrackerRPC(tracker.GetId(), tracker.GetPosition());
             }
         }
     }
 
-    void AddTrackerRPC(string playerId, string playerPlainId, string playerName, float hp, float blood, float shock, vector pos) {
+    void AddTrackerRPC(string playerId, string playerPlainId, string playerName, vector pos) {
         if (!GetGame().IsServer() || !GetGame().IsMultiplayer()) { return; }
         foreach (ClanMemberTracker tracker : arrayTrackers) {
             if (tracker.GetIdentity()) {
                 Print("sending add tracker RPC " + tracker.GetPlainId());
-                auto params = new Param7<string, string, string, float, float, float, vector>(playerId, playerPlainId, playerName, hp, blood, shock, pos);
+                auto params = new Param4<string, string, string, vector>(playerId, playerPlainId, playerName, pos);
                 GetGame().RPCSingleParam(tracker.GetPlayer(), ClanRPCEnum.ClientAddClanTracker, params, true, tracker.GetIdentity());
             }
         }
@@ -147,12 +207,12 @@ class ActiveClan : Clan {
         }
     }
 
-    void UpdateTrackerRPC(string playerId, float hp, float blood, float shock, vector pos) {
+    void UpdateTrackerRPC(string playerId, vector pos) {
         if (!GetGame().IsServer() || !GetGame().IsMultiplayer()) { return; }
         foreach (ClanMemberTracker tracker : arrayTrackers) {
             if (tracker.GetIdentity()) {
                 Print("sending update tracker RPC " + tracker.GetPlainId());
-                auto params = new Param5<string, float, float, float, vector>(playerId, hp, blood, shock, pos);
+                auto params = new Param2<string, vector>(playerId, pos);
                 GetGame().RPCSingleParam(tracker.GetPlayer(), ClanRPCEnum.ClientUpdateClanTracker, params, true, tracker.GetIdentity());
             }
         }
@@ -180,25 +240,39 @@ class ActiveClan : Clan {
         }
     }
 
+    void SetFundsRPC() {
+        if (!GetGame().IsServer() || !GetGame().IsMultiplayer()) { return; }
+        foreach (ClanMemberTracker tracker : arrayTrackers) {
+            if (tracker.GetIdentity()) {
+                Print("sending remove invite RPC " + tracker.GetPlainId());
+                auto params = new Param1<int>(funds);
+                GetGame().RPCSingleParam(tracker.GetPlayer(), ClanRPCEnum.ClientSetClanFunds, params, true, tracker.GetIdentity());
+            }
+        }
+    }
+
+    void DeleteClanRPC() {
+        if (!GetGame().IsServer() || !GetGame().IsMultiplayer()) { return; }
+        foreach (ClanMemberTracker tracker : arrayTrackers) {
+            if (tracker.GetIdentity()) {
+                GetGame().RPCSingleParam(tracker.GetPlayer(), ClanRPCEnum.ClientDeleteClan, NULL, true, tracker.GetIdentity());
+            }
+        }
+    }
+
     void Test() {
         Print("[DEBUG] DEBUGGING TRACKER ARRAY!!!!!!");
         arrayTrackers.Debug();
         foreach (ClanMemberTracker tracker : arrayTrackers) {
             Print("player=" + tracker.GetPlayer());
             Print("playerId=" + tracker.GetPlainId());
-            Print("pos=" + tracker.GetPlayer().GetPosition());
-            Print("blood=" + tracker.GetBlood(true));
-            Print("health=" + tracker.GetHealth(true));
-            Print("shock=" + tracker.GetShock(true));
+            Print("pos=" + tracker.GetPosition());
         }
     }
 
     bool IsPlayerInvited(string playerId) {
         bool found = false;
-
-        Print("Checking if a player is invited to the clan");
-        arrayInvitations.Debug();
-
+        
         foreach (string id : arrayInvitations) {
             if (id != string.Empty) {
                 if (id == playerId) {

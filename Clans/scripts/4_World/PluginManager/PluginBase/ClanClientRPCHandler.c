@@ -14,9 +14,11 @@ class ClanClientRPCHandler : PluginBase {
             delete this;
             return;
         }
+        ClanManageMenu manageMenu;
         ref ActiveClan clan;
         string playerId, playerPlainId, playerName, error, clanName;
         float playerHp, playerBlood, playerShock;
+        int funds;
         vector playerPos
 
         switch (rpc_type) {
@@ -79,20 +81,17 @@ class ClanClientRPCHandler : PluginBase {
             case ClanRPCEnum.ClientAddClanTracker:
                 {
                     Print("Client add tracker rpc received");
-                    Param7<string, string, string, float, float, float, vector> dataAddClanTracker;
+                    Param4<string, string, string, vector> dataAddClanTracker;
                     if (!ctx.Read(dataAddClanTracker)) { return; }
                     
                     playerId = dataAddClanTracker.param1;
                     playerPlainId = dataAddClanTracker.param2;
                     playerName = dataAddClanTracker.param3;
-                    playerHp = dataAddClanTracker.param4;
-                    playerBlood = dataAddClanTracker.param5;
-                    playerShock = dataAddClanTracker.param6;
-                    playerPos = dataAddClanTracker.param7;
+                    playerPos = dataAddClanTracker.param4;
                     clan = GetClanClientManager().GetClan();
 
                     if (clan) {
-                        clan.AddTracker(NULL, playerId, playerPlainId, playerName, playerHp, playerBlood, playerShock, playerPos);
+                        clan.AddTracker(NULL, playerId, playerPlainId, playerName, playerPos);
                     }
                     break;
                 }
@@ -115,18 +114,15 @@ class ClanClientRPCHandler : PluginBase {
             case ClanRPCEnum.ClientUpdateClanTracker:
                 {
                     Print("Client clan update tracker received");
-                    Param5<string, float, float, float, vector> dataUpdateClanTracker;
+                    Param2<string, vector> dataUpdateClanTracker;
                     if (!ctx.Read(dataUpdateClanTracker)) { return; }
 
                     playerId = dataUpdateClanTracker.param1;
-                    playerHp = dataUpdateClanTracker.param2;
-                    playerBlood = dataUpdateClanTracker.param3;
-                    playerShock = dataUpdateClanTracker.param4;
-                    playerPos = dataUpdateClanTracker.param5;
+                    playerPos = dataUpdateClanTracker.param2;
                     clan = GetClanClientManager().GetClan();
 
                     if (clan) {
-                        clan.UpdateTracker(playerId, playerHp, playerBlood, playerShock, playerPos);
+                        clan.UpdateTracker(playerId, playerPos);
                     }
                     break;
                 }
@@ -157,6 +153,86 @@ class ClanClientRPCHandler : PluginBase {
 
                     if (clan) {
                         clan.RemoveInvitation(playerId);
+                    }
+                    break;
+                }
+            // Add Member
+            case ClanRPCEnum.ClientAddClanMember:
+                {
+                    Print("Client add member received");
+                    Param2<string, string> dataAddClanMember;
+                    if (!ctx.Read(dataAddClanMember)) { return; }
+                    
+                    playerName = dataAddClanMember.param1;
+                    playerId = dataAddClanMember.param2;
+                    clan = GetClanClientManager().GetClan();
+
+                    if (clan) {
+                        clan.AddMember(playerName, playerId);
+                        RefreshManageMenu();
+                    }
+                    break;
+                }
+            // Remove Member
+            case ClanRPCEnum.ClientRemoveClanMember:
+                {
+                    Print("Client clan remove member received");
+                    Param1<string> dataRemoveClanMember;
+                    if (!ctx.Read(dataRemoveClanMember)) { return; }
+                    
+                    playerId = dataRemoveClanMember.param1;
+                    clan = GetClanClientManager().GetClan();
+
+                    if (clan) {
+                        clan.RemoveMember(playerId);
+                        RefreshManageMenu();
+                    }
+                    break;
+                }
+            // Promote Member
+            case ClanRPCEnum.ClientPromoteClanMember:
+                {
+                    Print("Client clan promote member received");
+                    Param1<string> dataPromoteClanMember;
+                    if (!ctx.Read(dataPromoteClanMember)) { return; }
+                    
+                    playerId = dataPromoteClanMember.param1;
+                    clan = GetClanClientManager().GetClan();
+
+                    if (clan) {
+                        clan.PromoteMember(playerId);
+                        RefreshManageMenu();
+                    }
+                    break;
+                }
+            // Demote Member
+            case ClanRPCEnum.ClientDemoteClanMember:
+                {
+                    Print("Client clan demote member received");
+                    Param1<string> dataDemoteClanMember;
+                    if (!ctx.Read(dataDemoteClanMember)) { return; }
+                    
+                    playerId = dataDemoteClanMember.param1;
+                    clan = GetClanClientManager().GetClan();
+
+                    if (clan) {
+                        clan.DemoteMember(playerId);
+                        RefreshManageMenu();
+                    }
+                    break;
+                }
+            // Set Funds
+            case ClanRPCEnum.ClientSetClanFunds:
+                {
+                    Print("Client clan remove invitation received");
+                    Param1<int> dataSetClanFunds;
+                    if (!ctx.Read(dataSetClanFunds)) { return; }
+                    
+                    funds = dataSetClanFunds.param1;
+                    clan = GetClanClientManager().GetClan();
+
+                    if (clan) {
+                        clan.SetFunds(funds);
                     }
                     break;
                 }
@@ -191,6 +267,18 @@ class ClanClientRPCHandler : PluginBase {
                     }
                     break;
                 }
+            case ClanRPCEnum.ClientDeleteClan:
+                {
+                    GetClanClientManager().DeleteClan();
+                }
+        }
+    }
+
+    void RefreshManageMenu() {
+        ClanManageMenu manageMenu = ClanManageMenu.Cast(GetGame().GetUIManager().GetMenu());
+
+        if (manageMenu) {
+            manageMenu.Refresh();
         }
     }
 }

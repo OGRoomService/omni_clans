@@ -1,6 +1,5 @@
 class ClanHud {
     private ref Widget wRoot;
-    private ref GridSpacerWidget rootGrid;
     private ref ActiveClan clan;
     private ref array<ref ClanMemberTracker> arrayTrackers;
     private ref map<ref ClanMemberTracker, ref ClanVisualTracker> mapVisualTrackers;
@@ -10,7 +9,6 @@ class ClanHud {
         mapVisualTrackers = new map<ref ClanMemberTracker, ref ClanVisualTracker>();
 
         wRoot = GetGame().GetWorkspace().CreateWidgets("Clans\\layouts\\ClanHud.layout", NULL);
-        rootGrid = GridSpacerWidget.Cast(wRoot.FindAnyWidget("gridPlayerData"));
         clan = activeClan;
         arrayTrackers = clan.GetTrackers();
 
@@ -19,7 +17,7 @@ class ClanHud {
 
     void InitVisualTrackers() {
         foreach (ClanMemberTracker tracker : arrayTrackers) {
-            ClanVisualTracker visualTracker = new ClanVisualTracker(tracker, wRoot, rootGrid);
+            ClanVisualTracker visualTracker = new ClanVisualTracker(tracker, wRoot);
             mapVisualTrackers.Set(tracker, visualTracker);
         }
     }
@@ -32,7 +30,7 @@ class ClanHud {
         Print("ADDING VISUAL TRACKER");
         RemoveVisualTracker(tracker);
         
-        ClanVisualTracker visualTracker = new ClanVisualTracker(tracker, wRoot, rootGrid);
+        ClanVisualTracker visualTracker = new ClanVisualTracker(tracker, wRoot);
         mapVisualTrackers.Set(tracker, visualTracker);
     }
 

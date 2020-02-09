@@ -1,15 +1,13 @@
 class ClanConfig {
-    private int TrackerSynchSensitivity;
-    private int TrackerUpdateInterval;
     private int TrackerPositionUpdateInterval;
     private int TrackerPositionDistanceSensitivity;
+    private string ClanOwnerRankName;
     private ref array<ref ClanMemberRank> ClanMemberRanks;
 
     void ClanConfig() {
         ClanMemberRanks = new array<ref ClanMemberRank>();
 
-        TrackerSynchSensitivity = 1;
-        TrackerUpdateInterval = 1;
+        ClanOwnerRankName == "President";
         TrackerPositionUpdateInterval = 5;
         TrackerPositionDistanceSensitivity = 25;
     }
@@ -19,17 +17,14 @@ class ClanConfig {
         ranks = ClanMemberRanks;
         ClanMemberRanks = new array<ref ClanMemberRank>();
 
-        if (TrackerSynchSensitivity < 1) {
-            TrackerSynchSensitivity = 1;
-        }
-        if (TrackerUpdateInterval < 1) {
-            TrackerUpdateInterval = 1;
-        }
         if (TrackerPositionUpdateInterval < 1) {
             TrackerPositionUpdateInterval = 5;
         }
         if (TrackerPositionDistanceSensitivity < 1) {
             TrackerPositionDistanceSensitivity = 25;
+        }
+        if (ClanOwnerRankName == string.Empty) {
+            ClanOwnerRankName = "President";
         }
         foreach (ClanMemberRank r : ranks) {
             if (r) {
@@ -91,13 +86,121 @@ class ClanConfig {
         return rank;
     }
 
-    int GetTrackerSynchSens() {
-        return TrackerSynchSensitivity;
+    string GetOwnerRankName() {
+        return ClanOwnerRankName;
     }
 
-    int GetTrackerUpdateInterval() {
-        return TrackerUpdateInterval;
+    string GetRankName(int num) {
+        string name;
+        ClanMemberRank rank = FindRank(num);
+
+        if (rank) {
+            return rank.GetName();
+        }
+        return name;
     }
+
+    bool IsHighestRank(int num) {
+        bool isHighestRank = false;
+        int count = ClanMemberRanks.Count();
+
+        for (int i = 0; i < count; i++) {
+            ClanMemberRank r = ClanMemberRanks[i];
+            
+            if (r) {
+                if (r.GetRank() == num) {
+                    if (i == 0) {
+                        isHighestRank = true;
+                    }
+                    break;
+                }
+            }
+        }
+        return isHighestRank;
+    }
+
+    bool IsLowestRank(int num) {
+        bool isLowestRank = false;
+        int count = ClanMemberRanks.Count();
+
+        for (int i = 0; i < count; i++) {
+            ClanMemberRank r = ClanMemberRanks[i];
+            
+            if (r) {
+                if (r.GetRank() == num) {
+                    if (i == (count - 1)) {
+                        isLowestRank = true;
+                    }
+                    break;
+                }
+            }
+        }
+        return isLowestRank;
+    }
+
+    bool CanInviteMembers(int rank) {
+        if (rank == 0) {
+            return true;
+        }
+        ref ClanMemberRank rankObject = FindRank(rank);
+
+        if (rankObject) {
+            return rankObject.GetPermissions().CanInviteMembers();
+        }
+        return false;
+    }
+
+    bool CanKickMembers(int rank) {
+        if (rank == 0) {
+            return true;
+        }
+        ref ClanMemberRank rankObject = FindRank(rank);
+
+        if (rankObject) {
+            return rankObject.GetPermissions().CanKickMembers();
+        }
+        return false;
+    }
+
+
+    bool CanPromoteMembers(int rank) {
+        if (rank == 0) {
+            return true;
+        }
+        ref ClanMemberRank rankObject = FindRank(rank);
+
+        if (rankObject) {
+            return rankObject.GetPermissions().CanPromoteMembers();
+        }
+        return false;
+    }
+
+
+    bool CanDemoteMembers(int rank) {
+        if (rank == 0) {
+            return true;
+        }
+        ref ClanMemberRank rankObject = FindRank(rank);
+
+        if (rankObject) {
+            return rankObject.GetPermissions().CanDemoteMembers();
+        }
+        return false;
+    }
+
+
+    bool CanContributeFunds(int rank) {
+        if (rank == 0) {
+            return true;
+        }
+        ref ClanMemberRank rankObject = FindRank(rank);
+
+        if (rankObject) {
+            return rankObject.GetPermissions().CanContributeFunds();
+        }
+        return false;
+    }
+
 
     int GetTrackerPositionUpdateInterval() {
         return TrackerPositionUpdateInterval;
