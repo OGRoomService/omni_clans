@@ -6,10 +6,10 @@ class ClanMemberGrid {
     private int unselectedBGColor;
 
     void ClanMemberGrid(Widget parent, ref ClanMember member, int unselectedBGColor) {
-        int memberRank = member.GetRank();
+        int memberRank = member.GetPlayerRank();
         string memberRankName;
 
-        root = GetGame().GetWorkspace().CreateWidgets("Clans\\layouts\\ManageMenuLeaderWidget.layout", parent);
+        root = GetGame().GetWorkspace().CreateWidgets("omni_clans\\gui\\layouts\\ManageMenuLeaderWidget.layout", parent);
         grid = GridSpacerWidget.Cast(root.FindAnyWidget("grid"));
         background = root.FindAnyWidget("pnlBackground");
         txtName = TextWidget.Cast(root.FindAnyWidget("txtName"));
@@ -19,13 +19,13 @@ class ClanMemberGrid {
         if (memberRank == 0) {
             memberRankName = GetClanManager().GetConfig().GetOwnerRankName();
         } else {
-            memberRankName = GetClanManager().GetConfig().GetRankName(member.GetRank());
+            memberRankName = GetClanManager().GetConfig().GetRankName(member.GetPlayerRank());
         }
-        if (unselectedBGColor != ARGB(255, 255, 255, 255)) {
+        if (unselectedBGColor != ClanColors.WHITE) {
             background.Show(true);
             background.SetColor(unselectedBGColor);
         }
-        txtName.SetText("" + member.GetName());
+        txtName.SetText("" + member.GetPlayerName());
         txtRank.SetText("" + memberRankName);
         txtContributions.SetText("" + member.GetContribution());
         this.parent = parent;
@@ -34,7 +34,7 @@ class ClanMemberGrid {
     }
 
     void ~ClanMemberGrid() {
-        Print("Deleting member grid");
+        Print(ClanStatic.debugPrefix + "Deleting member grid");
         root.Unlink();
     }
 
@@ -48,11 +48,11 @@ class ClanMemberGrid {
 
     void ShowBackground() {
         background.Show(true);
-        background.SetColor(ARGB(255, 143, 18, 18));
+        background.SetColor(ClanColors.DARK_RED);
     }
 
     void HideBackground() {
-        if (unselectedBGColor == ARGB(255, 255, 255, 255)) {
+        if (unselectedBGColor == ClanColors.WHITE) {
             background.Show(false);
         } else {
             background.SetColor(unselectedBGColor);

@@ -1,0 +1,203 @@
+FrameWidgetClass rootFrame {
+ size 1 1
+ hexactpos 0
+ vexactpos 0
+ hexactsize 0
+ vexactsize 0
+ {
+  PanelWidgetClass pnlBlur {
+   ignorepointer 0
+   color 0.7451 0.7451 0.7451 0.2353
+   position 0 0
+   size 5000 5000
+   halign center_ref
+   valign center_ref
+   hexactpos 0
+   vexactpos 0
+   hexactsize 1
+   vexactsize 1
+   style rover_sim_colorable
+  }
+  PanelWidgetClass rootConfirmation {
+   visible 1
+   color 0 0 0 1
+   position 0 0
+   size 420 230
+   halign center_ref
+   valign center_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   style rover_sim_colorable
+   {
+    ButtonWidgetClass btnSave {
+     color 0.0706 0.5608 0.1922 1
+     position 225 15
+     size 90 30
+     halign right_ref
+     valign bottom_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     style DayZDefaultButton
+     text "SAVE"
+     text_proportion 0.7
+    }
+    PanelWidgetClass pnlInputOutline {
+     visible 1
+     ignorepointer 1
+     color 0.5608 0.0706 0.0706 1
+     size 1 1
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     style Outline
+    }
+    TextWidgetClass txtHeader {
+     ignorepointer 1
+     position 105 10
+     size 20 38
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     text "CHEVRON COLOR"
+     "size to text h" 1
+     "size to text v" 0
+    }
+    ButtonWidgetClass btnCancel {
+     color 0.5608 0.0706 0.0706 1
+     position 15 15
+     size 90 30
+     halign right_ref
+     valign bottom_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     style DayZDefaultButton
+     text "CANCEL"
+     text_proportion 0.7
+    }
+    TextWidgetClass txtRed {
+     ignorepointer 1
+     position 15 -42
+     size 300 32
+     halign right_ref
+     valign center_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     "text halign" center
+     "text valign" center
+    }
+    TextWidgetClass txtGreen {
+     ignorepointer 1
+     position 15 0
+     size 300 32
+     halign right_ref
+     valign center_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     "text halign" center
+     "text valign" center
+    }
+    TextWidgetClass txtBlue {
+     ignorepointer 1
+     position 15 42
+     size 300 32
+     halign right_ref
+     valign center_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     "text halign" center
+     "text valign" center
+    }
+    SliderWidgetClass sliderRed {
+     keepsafezone 0
+     color 0.5608 0.0706 0.0706 1
+     position 15 -42
+     size 300 38
+     halign right_ref
+     valign center_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     maximum 255
+     current 255
+     vertical 0
+     flipped 0
+    }
+    SliderWidgetClass sliderGreen {
+     keepsafezone 0
+     color 0.0706 0.5608 0.1922 1
+     position 15 0
+     size 300 38
+     halign right_ref
+     valign center_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     maximum 255
+     current 255
+     vertical 0
+     flipped 0
+    }
+    SliderWidgetClass sliderBlue {
+     keepsafezone 0
+     color 0.0706 0.1922 0.5608 1
+     position 15 42
+     size 300 38
+     halign right_ref
+     valign center_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     maximum 255
+     current 255
+     vertical 0
+     flipped 0
+    }
+    ImageWidgetClass imgChevron {
+     ignorepointer 1
+     position 14 0
+     size 77 64
+     valign center_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     imageTexture "{547DF0F374DD83E6}omni_clans/gui/img/menuChevronFill.edds"
+     mode blend
+     "src alpha" 1
+     stretch 1
+    }
+    ImageWidgetClass imgChevronBorder {
+     ignorepointer 1
+     position 14 0
+     size 77 64
+     valign center_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     imageTexture "{C7229660A14EAF5D}omni_clans/gui/img/menuChevronBorder.edds"
+     mode blend
+     "src alpha" 1
+     stretch 1
+    }
+   }
+  }
+ }
+}

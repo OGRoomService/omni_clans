@@ -7,77 +7,94 @@ class ClanVisualTracker {
     private bool relativeScreenSide = false; // false = left | true = right
 
     void ClanVisualTracker(ref ClanMemberTracker tracker, Widget parent) {
+        int red, green, blue;
         string playerName = tracker.GetName();
         
         parentWidget = parent;
         playerDataTracker = tracker;
-        playerVisualTracker = GetGame().GetWorkspace().CreateWidgets("Clans\\layouts\\ClanVisualTracker.layout", parent);
+        playerVisualTracker = GetGame().GetWorkspace().CreateWidgets("omni_clans\\gui\\layouts\\ClanVisualTracker.layout", parent);
         txtPlayerName = TextWidget.Cast(playerVisualTracker.FindAnyWidget("txtPlayerName"));
-        playerVisualTracker.Show(false);
+        imgChevron = ImageWidget.Cast(playerVisualTracker.FindAnyWidget("imgChevron"));
 
-        if (playerName == string.Empty) {
-            playerName = "SOME RANDOM AI";
-        }
+		GetClanClientManager().GetClientSettings().GetColorSettings(red, green, blue);
+        imgChevron.SetColor(ARGB(255, red, green, blue));
         txtPlayerName.SetText(playerDataTracker.GetName());
         txtPlayerName.Show(false);
+        playerVisualTracker.Show(false);
 
-        GetGame().GetCallQueue(CALL_CATEGORY_GUI).Remove(this.CheckForPlayerBase);
-        GetGame().GetCallQueue(CALL_CATEGORY_GUI).CallLater(this.CheckForPlayerBase, 1000, true);
+        InitPlayerCheckLoop();
     }
 
     void ~ClanVisualTracker() {
-        Print("DELETING VISUAL TRACKER");
+        Print(ClanStatic.debugPrefix + "DELETING VISUAL TRACKER");
         if (playerVisualTracker) {
             playerVisualTracker.Unlink();
         }
     }
 
+    void InitPlayerCheckLoop() {
+        RemovePlayerCheckLoop();
+        GetGame().GetCallQueue(CALL_CATEGORY_GUI).CallLaterByName(this, "CheckForPlayerBase", 1000, true);
+    }
+
+    void RemovePlayerCheckLoop() {
+        GetGame().GetCallQueue(CALL_CATEGORY_GUI).RemoveByName(this, "CheckForPlayerBase");
+    }
+
+    void InitUpdateLoop() {
+        GetGame().GetCallQueue(CALL_CATEGORY_GUI).CallLaterByName(this, "UpdateVisualTracker", 10, true);
+    }
+
+    void RemoveUpdateLoop() {
+        GetGame().GetCallQueue(CALL_CATEGORY_GUI).RemoveByName(this, "UpdateVisualTracker");
+    }
+
     void CheckForPlayerBase() {
-        if (!playerDataTracker) {
-            //Print("DELETING TRACKER, DATA TRACKER NOT FOUND");
+        if (!playerDataTracker || playerDataTracker.GetPlayerId() == GetGame().GetPlayer().GetIdentity().GetId()) {
+            RemovePlayerCheckLoop();
+            Print("DELETING TRACKER, DATA TRACKER NOT FOUND");
             delete this;
             return;
         }
-        if (playerDataTracker.GetPlainId() == GetClanClientManager().GetPlainId()) {
-            //Print("Visual tracker is current clients tracker! Deleting visual and removing call queue");
-            if (playerVisualTracker) {
-                playerVisualTracker.Unlink();
-                delete playerVisualTracker;
+        Print(ClanStatic.debugPrefix + "Searching for playerbase to show/hide visual tracker!");
+        PlayerBase trackerPlayer = playerDataTracker.GetPlayer();
+
+        Print(ClanStatic.debugPrefix + "Player on tracker = " + trackerPlayer);
+        if (trackerPlayer && trackerPlayer.IsAlive()) {
+            Print(ClanStatic.debugPrefix + "Player base found on tracker! ");
+            if (!playerVisualTracker.IsVisible()) {
+                playerVisualTracker.Show(true);
+                InitUpdateLoop();
             }
-            GetGame().GetCallQueue(CALL_CATEGORY_GUI).Remove(this.CheckForPlayerBase);
-            return;
         } else {
-            //Print("Searching for playerbase to show/hide visual tracker!");
-            if (playerDataTracker.GetPlayer()) {
-                //Print("Player base found on tracker!");
-                if (!isUpdatingVisualTracker) {
-                    playerVisualTracker.Show(true);
-                    GetGame().GetCallQueue(CALL_CATEGORY_GUI).Remove(this.UpdateVisualTracker);
-                    GetGame().GetCallQueue(CALL_CATEGORY_GUI).CallLater(this.UpdateVisualTracker, 10, true);
-                }
-            } else {
-                //Print("Player base could not be found on tracker!");
-                playerVisualTracker.Show(false);
-                GetGame().GetCallQueue(CALL_CATEGORY_GUI).Remove(this.UpdateVisualTracker);
-            }
+            Print(ClanStatic.debugPrefix + "Player base could not be found on tracker!");
+            playerVisualTracker.Show(false);
+            RemoveUpdateLoop();
         }
+    }
+
+    void UpdateChevronColor() {
+        int red, green, blue;
+
+		GetClanClientManager().GetClientSettings().GetColorSettings(red, green, blue);
+        imgChevron.SetColor(ARGB(255, red, green, blue));
     }
 
     void UpdateVisualTracker() {
         if (!playerDataTracker.GetPlayer()) {
-            isUpdatingVisualTracker = false;
+            Print(ClanStatic.debugPrefix + "Cannot find playerbase! Removing chevron update loop!");
+            RemoveUpdateLoop();
+            playerVisualTracker.Show(false);
             return;
-        }
-        if (!playerVisualTracker.IsVisible()) {
-            playerVisualTracker.Show(true);
         }
         float posX, posY;
         vector playerHeadPos, relativeScreenPos, screenPos, angleVector;
 
+        playerVisualTracker.Show(true);
         MiscGameplayFunctions.GetHeadBonePos(playerDataTracker.GetPlayer(), playerHeadPos);
         // Shift actual vector numbers instead of pixels. This makes the tracker stick to the target better at range
+        //playerHeadPos[0] = playerHeadPos[0] + 0.;
         playerHeadPos[1] = playerHeadPos[1] + 0.5;
-        //playerHeadPos[0] = playerHeadPos[0] + 0.1;
         relativeScreenPos = GetGame().GetScreenPosRelative(playerHeadPos);
         screenPos = GetGame().GetScreenPos(playerHeadPos);
         posY = Math.Ceil(screenPos[1]);
@@ -91,10 +108,10 @@ class ClanVisualTracker {
                 relativeScreenSide = true;
             }
             if (relativeScreenPos[0] > 0.489 && relativeScreenPos[0] < 0.51 && relativeScreenPos[1] > 0.43 && relativeScreenPos[1] < 0.48) {
-                playerVisualTracker.SetColor(ARGB(180, 255, 255, 255));
+                playerVisualTracker.SetColor(ClanColors.TRANS_WHITE);
                 txtPlayerName.Show(true);
             } else {
-                playerVisualTracker.SetColor(ARGB(255, 255, 255, 255));
+                playerVisualTracker.SetColor(ClanColors.WHITE);
                 txtPlayerName.Show(false);
             }
             screenPos = GetGame().GetScreenPos(playerHeadPos);
@@ -119,5 +136,9 @@ class ClanVisualTracker {
                 playerVisualTracker.SetPos(0, posY);
             }
         }
+    }
+
+    string GetPlayerId() {
+        return playerDataTracker.GetPlayerId();
     }
 }

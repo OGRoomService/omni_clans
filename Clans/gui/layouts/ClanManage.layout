@@ -1,7 +1,7 @@
 PanelWidgetClass rootFrame {
  color 0 0 0 1
  position 0 0
- size 893 486
+ size 1100 486
  halign center_ref
  valign center_ref
  hexactpos 1
@@ -13,7 +13,7 @@ PanelWidgetClass rootFrame {
   ScrollWidgetClass scrollMembers {
    ignorepointer 1
    position 20 20
-   size 650 350
+   size 860 350
    valign bottom_ref
    hexactpos 1
    vexactpos 1
@@ -53,7 +53,7 @@ PanelWidgetClass rootFrame {
   }
   ButtonWidgetClass btnDemote {
    color 0.5608 0.0706 0.0706 1
-   position 20 65
+   position 20 155
    size 180 35
    halign right_ref
    valign bottom_ref
@@ -67,7 +67,7 @@ PanelWidgetClass rootFrame {
   }
   ButtonWidgetClass btnPromote {
    color 0.5608 0.0706 0.0706 1
-   position 20 110
+   position 20 200
    size 180 35
    halign right_ref
    valign bottom_ref
@@ -79,9 +79,23 @@ PanelWidgetClass rootFrame {
    text "Promote"
    text_proportion 0.45
   }
+  ButtonWidgetClass btnKick {
+   color 0.5608 0.0706 0.0706 1
+   position 20 110
+   size 180 35
+   halign right_ref
+   valign bottom_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   style DayZDefaultButton
+   text "Kick"
+   text_proportion 0.45
+  }
   ButtonWidgetClass btnUpgrade {
    color 0.5608 0.0706 0.0706 1
-   position 20 155
+   position 20 65
    size 180 35
    halign right_ref
    valign bottom_ref
@@ -123,8 +137,8 @@ PanelWidgetClass rootFrame {
   }
   ButtonWidgetClass btnClose {
    color 0.5608 0.0706 0.0706 1
-   position 10 10
-   size 20 20
+   position 20 10
+   size 32 32
    halign right_ref
    hexactpos 1
    vexactpos 1
@@ -134,11 +148,41 @@ PanelWidgetClass rootFrame {
    text "X"
    "text color" 0.5608 0.0706 0.0706 1
   }
+  ImageWidgetClass imgSettings {
+   ignorepointer 1
+   color 1 0 0 1
+   position 58 10
+   size 32 32
+   halign right_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   imageTexture "{DCE407C2BD739CD7}omni_clans/gui/img/settingsCog.edds"
+   mode opaque
+   "src alpha" 0
+   stretch 1
+   {
+    ButtonWidgetClass btnSettings {
+     color 0.5608 0.0706 0.0706 1
+     position 0 0
+     size 1 1
+     halign center_ref
+     valign center_ref
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     style Default
+     "text color" 0.5608 0.0706 0.0706 1
+    }
+   }
+  }
   PanelWidgetClass pnlTitleBar {
    ignorepointer 1
    color 0.4902 0.4902 0.4902 1
    position 20 370
-   size 650 30
+   size 860 30
    valign bottom_ref
    hexactpos 1
    vexactpos 1
@@ -148,8 +192,8 @@ PanelWidgetClass rootFrame {
    {
     GridSpacerWidgetClass gridTitle {
      ignorepointer 1
-     position 0.01 0
-     size 0.98 1
+     position 0 0
+     size 1 1
      valign bottom_ref
      hexactpos 0
      vexactpos 0
@@ -157,37 +201,38 @@ PanelWidgetClass rootFrame {
      vexactsize 0
      Padding 0
      Margin 0
+     "Size To Content H" 1
      content_valign center
      Rows 1
      {
       TextWidgetClass txtName {
        ignorepointer 1
-       position 10 10
-       size 48 48
-       hexactpos 1
-       vexactpos 1
-       hexactsize 1
-       vexactsize 1
+       position 0.109 0.524
+       size 0.365 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
        text "Name"
       }
       TextWidgetClass txtRank {
        ignorepointer 1
        position 10 10
-       size 48 48
+       size 0.365 1
        hexactpos 1
        vexactpos 1
-       hexactsize 1
-       vexactsize 1
+       hexactsize 0
+       vexactsize 0
        text "Rank"
       }
       TextWidgetClass txtContribution {
        ignorepointer 1
        position 10 10
-       size 48 48
+       size 0.255 1
        hexactpos 1
        vexactpos 1
-       hexactsize 1
-       vexactsize 1
+       hexactsize 0
+       vexactsize 0
        text "Contributions"
       }
      }
@@ -197,7 +242,7 @@ PanelWidgetClass rootFrame {
   TextWidgetClass txtTitle {
    ignorepointer 1
    position 20 400
-   size 650 30
+   size 860 30
    valign bottom_ref
    hexactpos 1
    vexactpos 1
@@ -222,7 +267,7 @@ PanelWidgetClass rootFrame {
   }
   TextWidgetClass txtOnTitle {
    ignorepointer 1
-   position 693 400
+   position 900 400
    size 115 30
    valign bottom_ref
    hexactpos 1
@@ -251,7 +296,7 @@ PanelWidgetClass rootFrame {
   }
   TextWidgetClass txtFundTitle {
    ignorepointer 1
-   position 693 290
+   position 900 290
    size 115 30
    valign bottom_ref
    hexactpos 1

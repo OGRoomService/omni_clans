@@ -1,0 +1,16 @@
+MetaFileClass {
+ Name "{DCE407C2BD739CD7}omni_clans/gui/img/settingsCog.edds"
+ Author "bryanpc"
+ ChangeDate 213084248
+ Configurations {
+  TGAResourceClass PC {
+   SourceFile "settingsCog.tga"
+  }
+  TGAResourceClass XBOX_ONE : PC {
+  }
+  TGAResourceClass PS4 : PC {
+  }
+  TGAResourceClass LINUX : PC {
+  }
+ }
+}

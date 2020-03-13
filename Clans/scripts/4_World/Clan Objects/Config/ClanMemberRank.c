@@ -3,10 +3,10 @@ class ClanMemberRank {
     private string name;
     private ref ClanRankPerms perms;
 
-    void ClanMemberRank(int r, string n) {
+    void ClanMemberRank(int rank, string name) {
         perms = new ClanRankPerms();
-        rank = r;
-        name = n;
+        this.rank = rank;
+        this.name = name;
     }
 
     ref ClanRankPerms GetPermissions() {

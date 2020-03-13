@@ -1,5 +1,5 @@
 enum ClanRPCEnum {
-    ServerCreateClan = 1982392,
+    ServerCreateClan = -9928341,
     ServerAddInvitation,
     ServerManageInvite,
     ServerPromoteClanMember,
@@ -28,12 +28,21 @@ enum ClanRPCEnum {
     ClientAddClanMember,
     ClientRemoveClanMember,
         // Clan Funds Management
-    ClientSetClanFunds,
+    ClientAddClanFunds,
+    ClientRemoveClanFunds,
+    ClientAddClanMemberContributions,
+        // Clan Upgrade Management
+    ClientUpgradeClan,
+        // Clan Member Contributions Management
+    ClientSetMemberContributions,
+        // Clan Member Update Management
+    ClientUpdateClanMember,
     // END Clan Management Enums
     ClientAddOnlinePlayer,
     ClientRemoveOnlinePlayer,
-    ClientReceivePlayerList,
     ClientReceiveInvite,
+    ClientDeleteInvite,
     ClientDeleteClan,
-    ClientInitialize
+    ClientInitialize,
+    ClientUpdateLeaderboard
 }

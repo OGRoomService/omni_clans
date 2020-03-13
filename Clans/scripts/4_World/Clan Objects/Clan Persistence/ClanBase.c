@@ -1,15 +1,13 @@
 class ClanBase {
-    protected int rank;
+    protected int clanLevel;
     protected string clanName;
 
-    void SetRank(int r) {
-        if (!GetGame().IsServer() || !GetGame().IsMultiplayer()) { return; }
-
-        rank = r;
+    void SetRank(int clanLevel) {
+        this.clanLevel = clanLevel;
     }
 
     int GetRank() {
-        return rank;
+        return clanLevel;
     }
 
     string GetName() {
@@ -17,8 +15,10 @@ class ClanBase {
     }
 
     string GetCaseName() {
-        string caseName = clanName;
-        caseName.ToLower();
-        return caseName;
+        string lowercaseName = clanName;
+
+        lowercaseName.ToLower()
+
+        return lowercaseName;
     }
 }

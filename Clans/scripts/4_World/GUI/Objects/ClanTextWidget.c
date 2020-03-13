@@ -4,10 +4,12 @@ class ClanTextWidget {
     private ref ClanUser clanUser;
 
     void ClanTextWidget(Widget parent, ref ClanUser user, string text) {
-        wRoot = GetGame().GetWorkspace().CreateWidgets("Clans\\layouts\\ListText.layout", parent);
+        wRoot = GetGame().GetWorkspace().CreateWidgets("omni_clans\\gui\\layouts\\ListText.layout", parent);
 		txtWidget = TextWidget.Cast(wRoot.FindAnyWidget("txtName"));
 		background = wRoot.FindAnyWidget("pnlBackground");
         clanUser = user;
+
+        SetColor(ClanColors.GRAY);
         SetText(text);
     }
 

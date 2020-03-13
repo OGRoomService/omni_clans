@@ -1,0 +1,83 @@
+FrameWidgetClass rootFrame {
+ ignorepointer 1
+ size 1 1
+ hexactpos 0
+ vexactpos 0
+ hexactsize 0
+ vexactsize 0
+ {
+  PanelWidgetClass pnlBlur {
+   ignorepointer 0
+   color 0.7451 0.7451 0.7451 0.2353
+   size 5000 5000
+   halign center_ref
+   valign center_ref
+   hexactpos 0
+   vexactpos 0
+   hexactsize 1
+   vexactsize 1
+   style rover_sim_colorable
+  }
+  PanelWidgetClass rootInput {
+   visible 1
+   color 0 0 0 1
+   position 0 0
+   size 380 137
+   halign center_ref
+   valign center_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   style rover_sim_colorable
+   {
+    ButtonWidgetClass btnEnter {
+     color 0.5608 0.0706 0.0706 1
+     position 0 10
+     size 70 20
+     halign center_ref
+     valign bottom_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     style DayZDefaultButton
+     text_proportion 0.7
+    }
+    PanelWidgetClass pnlInputOutline {
+     visible 1
+     ignorepointer 1
+     color 0.5608 0.0706 0.0706 1
+     size 1 1
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     style Outline
+    }
+    EditBoxWidgetClass edtInput {
+     color 0.5608 0.0706 0.0706 1
+     size 350 48
+     halign center_ref
+     valign center_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+    }
+    TextWidgetClass txtHeader {
+     ignorepointer 1
+     position 0 10
+     size 20 30
+     halign center_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     "size to text h" 1
+     "size to text v" 0
+    }
+   }
+  }
+ }
+}

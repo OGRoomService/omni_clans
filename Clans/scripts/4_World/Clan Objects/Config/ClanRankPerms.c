@@ -1,5 +1,5 @@
 class ClanRankPerms {
-    string CanInviteMembers, CanKickMembers, CanPromoteMembers, CanDemoteMembers, CanContributeFunds;
+    string CanInviteMembers, CanKickMembers, CanPromoteMembers, CanDemoteMembers, CanContributeFunds, CanUpgradeClan;
 
     void ClanRankPerms() {
         CanInviteMembers = "false";
@@ -7,6 +7,7 @@ class ClanRankPerms {
         CanPromoteMembers = "false";
         CanDemoteMembers = "false";
         CanContributeFunds = "false";
+        CanUpgradeClan = "false";
     }
 
     bool CanInviteMembers() {
@@ -51,6 +52,16 @@ class ClanRankPerms {
 
     bool CanContributeFunds() {
         string loweredString = CanContributeFunds;
+        loweredString.ToLower();
+
+        if (loweredString == "true") {
+            return true;
+        }
+        return false;
+    }
+
+    bool CanUpgradeClan() {
+        string loweredString = CanUpgradeClan;
         loweredString.ToLower();
 
         if (loweredString == "true") {

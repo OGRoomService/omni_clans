@@ -1,10 +1,10 @@
 MetaFileClass {
- Name "{C45025998CB7BD23}Clans/layouts/chevron.edds"
+ Name "{C7229660A14EAF5D}omni_clans/gui/img/menuChevronBorder.edds"
  Author "bryanpc"
- ChangeDate -725866435
+ ChangeDate 1434167384
  Configurations {
   TGAResourceClass PC {
-   SourceFile "chevron.tga"
+   SourceFile "menuChevronBorder.tga"
   }
   TGAResourceClass XBOX_ONE : PC {
   }

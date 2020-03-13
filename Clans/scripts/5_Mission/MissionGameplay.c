@@ -1,4 +1,8 @@
 modded class MissionGameplay : MissionBase {
+    void MissionGameplay() {
+        GetClanClientManager().Init();
+    }
+
     override UIScriptedMenu CreateScriptedMenu(int id) {
         UIScriptedMenu menu = null;
         menu = super.CreateScriptedMenu(id);
@@ -23,24 +27,31 @@ modded class MissionGameplay : MissionBase {
         return menu;
     }
 
-    override void OnKeyPress(int key) {
-        switch (key) {
-            case KeyCode.KC_NUMPADENTER:
-                GetUIManager().EnterScriptedMenu(ClanMenuEnum.ManageMenu, null);
-                break;
-            case KeyCode.KC_SEMICOLON:
-                GetUIManager().EnterScriptedMenu(ClanMenuEnum.Menu, null);
-                break;
-            case KeyCode.KC_ESCAPE:
-                ClanMenu menu = ClanMenu.Cast(GetGame().GetUIManager().GetMenu());
+    override void OnUpdate(float timeslice) {
+        super.OnUpdate(timeslice);
 
-                if (menu) {
-                    menu.HandleClose();
-                    return;
-                }
-                break;
+        Input input;
+        ClanMenu clanMenu;
+
+        input = GetGame().GetInput();
+
+        if (input.LocalPress("UAUIBack", false)) {
+            clanMenu = ClanMenu.Cast(GetGame().GetUIManager().GetMenu());
+
+            if (clanMenu) {
+                clanMenu.HandleClose();
+            }
         }
-        super.OnKeyPress(key);
-        m_Hud.KeyPress(key);
+        if (input.LocalPress("OCToggleClanMenu", false)) {
+            if (!g_Game.IsKeyboardBusy()) {
+                clanMenu = ClanMenu.Cast(GetGame().GetUIManager().GetMenu());
+
+                if (clanMenu && !clanMenu.IsInputDialogVisible()) {
+                    clanMenu.HandleClose();
+                } else {
+                    GetUIManager().EnterScriptedMenu(ClanMenuEnum.Menu, null);
+                }
+            }
+        }
     }
 }

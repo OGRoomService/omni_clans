@@ -1,36 +1,31 @@
 class ClanMember {
-    private string name, playerId;
+    private string playerName, playerId, playerPlainId;
     private int rank, contribution;
 
-    void ClanMember(string n, string id, int r) {
-        name = n;
-        playerId = id;
-        contribution = 0;
-        rank = r;
-        // set rank to lowest possible rank... 
-        // Should I have this in ascending order? 
-        // Definitely not becuase if more ranks are added then all of a sudden the owner is no longer owner.... 
-        // but then how do I ensure that when ranks are added the lowest ranked players aren't all of a sudden the 
-        // highest ranked? I guess server owners are just going to have to manage that correctly by assigning numbers 
-        // far apart so that they don't run into this conflict. I'll let hollow know the deal with that when this is finished.
+    void ClanMember(string playerName, string playerId, string playerPlainId, int rank) {
+        this.playerName = playerName;
+        this.playerId = playerId;
+        this.playerPlainId = playerPlainId;
+        this.rank = rank;
+        this.contribution = 0;
     }
 
-    void SetRank(int r) {
+    void SetName(string playerName) {
+        this.playerName = playerName;
+    }
+
+    void SetRank(int rank) {
         if (!GetGame().IsServer() || !GetGame().IsMultiplayer()) { return; }
 
-        rank = r;
+        this.rank = rank;
     }
 
-    // Other logic required for promotions/demotions can be done in server-rpc handler or clan
-    // Descending order hierarchy. 0 is top of chain = owner. Do not allow assignment to any other member
     void Promote() {
-        // PROMOTE THE USER BASED ON NEXT LOWEST IN CONFIG;
         ref array<ref ClanMemberRank> configRanks = GetClanManager().GetConfig().GetRanks();
-        ref ClanMemberRank currentRank = GetClanManager().GetConfig().FindRank(rank);
+        ref ClanMemberRank currentRank = GetClanManager().GetConfig().FindRankByInt(rank);
         int currentRankIndex = configRanks.Find(currentRank);
 
         if (currentRankIndex == -1) {
-            // For some reason they have a non existant rank, reset to lowest rank
             rank = configRanks[configRanks.Count() - 1].GetRank();
         } else {
             if (currentRankIndex != 0) {
@@ -40,9 +35,8 @@ class ClanMember {
     }
 
     void Demote() {
-        // DEMOTE THE USER BASED ON NEXT LOWEST IN CONFIG;
         ref array<ref ClanMemberRank> configRanks = GetClanManager().GetConfig().GetRanks();
-        ref ClanMemberRank currentRank = GetClanManager().GetConfig().FindRank(rank);
+        ref ClanMemberRank currentRank = GetClanManager().GetConfig().FindRankByInt(rank);
         int configRanksCount = configRanks.Count();
         int currentRankIndex = configRanks.Find(currentRank);
 
@@ -55,31 +49,31 @@ class ClanMember {
         }
     }
 
-    void AddContribution(int amount) {
-        if (!GetGame().IsServer() || !GetGame().IsMultiplayer()) { return; }
-
-        contribution += amount;
+    void AddContribution(int contribution) {
+        this.contribution += contribution;
     }
 
-    void RemoveContribution(int amount) {
-        if (!GetGame().IsServer() || !GetGame().IsMultiplayer()) { return; }
-        
-        contribution -= amount;
+    void RemoveContribution(int contribution) {
+        this.contribution -= contribution;
 
-        if (contribution < 0) {
-            contribution = 0;
+        if (this.contribution < 0) {
+            this.contribution = 0;
         }
     }
 
-    string GetName() {
-        return name;
+    string GetPlayerName() {
+        return playerName;
     }
 
-    string GetId() {
+    string GetPlayerId() {
         return playerId;
     }
 
-    int GetRank() {
+    string GetPlayerPlainId() {
+        return playerPlainId;
+    }
+
+    int GetPlayerRank() {
         return rank;
     }
 

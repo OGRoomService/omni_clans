@@ -28,12 +28,13 @@ FrameWidgetClass rootFrame {
    vexactsize 0
    Padding 0
    Margin 0
+   "Size To Content H" 1
    Rows 1
    {
     TextWidgetClass txtName {
      ignorepointer 1
      position 0 0
-     size 1 1
+     size 0.37 1
      hexactpos 0
      vexactpos 0
      hexactsize 0
@@ -42,7 +43,7 @@ FrameWidgetClass rootFrame {
     TextWidgetClass txtRank {
      ignorepointer 1
      position 0 0
-     size 1 1
+     size 0.37 1
      hexactpos 0
      vexactpos 0
      hexactsize 0
@@ -51,7 +52,7 @@ FrameWidgetClass rootFrame {
     TextWidgetClass txtContributions {
      ignorepointer 1
      position 0 0
-     size 1 1
+     size 0.26 1
      hexactpos 0
      vexactpos 0
      hexactsize 0

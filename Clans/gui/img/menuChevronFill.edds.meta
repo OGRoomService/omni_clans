@@ -1,0 +1,16 @@
+MetaFileClass {
+ Name "{547DF0F374DD83E6}omni_clans/gui/img/menuChevronFill.edds"
+ Author "bryanpc"
+ ChangeDate 1534830680
+ Configurations {
+  TGAResourceClass PC {
+   SourceFile "menuChevronFill.tga"
+  }
+  TGAResourceClass XBOX_ONE : PC {
+  }
+  TGAResourceClass PS4 : PC {
+  }
+  TGAResourceClass LINUX : PC {
+  }
+ }
+}

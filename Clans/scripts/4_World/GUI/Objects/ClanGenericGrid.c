@@ -6,13 +6,13 @@ class ClanGenericGrid {
     void ClanGenericGrid(Widget parent, string path) {
         clanMemberChildren = new array<ref ClanMemberGrid>();
 
-        grid = GridSpacerWidget.Cast(GetGame().GetWorkspace().CreateWidgets("Clans\\layouts\\" + path + ".layout", parent));
+        grid = GridSpacerWidget.Cast(GetGame().GetWorkspace().CreateWidgets("omni_clans\\gui\\layouts\\" + path + ".layout", parent));
 
-        Print("Creating new generic grid");
+        Print(ClanStatic.debugPrefix + "Creating new generic grid");
     }
 
     void ~ClanGenericGrid() {
-        Print("Deleting generic grid");
+        Print(ClanStatic.debugPrefix + "Deleting generic grid");
         grid.Unlink();
     }
 

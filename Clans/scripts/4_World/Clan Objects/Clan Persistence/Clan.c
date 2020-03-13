@@ -1,77 +1,23 @@
 class Clan : ClanBase {
-    protected int funds, yearLastActive, monthLastActive, dayLastActive;
-    protected string ownerName, ownerId;
-    protected ref array<ref ClanMember> members;
+    protected int clanFunds, yearLastActive, monthLastActive, dayLastActive;
+    protected string ownerName, ownerId, ownerPlainId;
+    protected ref array<ref ClanMember> arrayClanMembers;
 
-    void Clan(string id, string pName, string name) {
-        ref ClanMember member = new ClanMember(pName, id, 0);
-        members = new array<ref ClanMember>();
-        ownerId = id;
-        ownerName = pName;
-        clanName = name;
-        rank = 0;
-        members.Insert(member);
+    void Clan(string clanName, string ownerName, string ownerId, string ownerPlainId) {
+        ref ClanMember memberOwner = new ClanMember(ownerName, ownerId, ownerPlainId, 0);
+
+        this.clanLevel = 1;
+        this.clanName = clanName;
+        this.arrayClanMembers = new array<ref ClanMember>();
+        this.ownerName = ownerName;
+        this.ownerId = ownerId;
+        this.ownerPlainId = ownerPlainId;
+        this.arrayClanMembers.Insert(memberOwner);
     }
-
-    void AddFunds(int amount) {
-        if (!GetGame().IsServer() || !GetGame().IsMultiplayer()) { return; }
-
-        funds += amount;
-    }
-
-    void RemoveFunds(int amount) {
-        if (!GetGame().IsServer() || !GetGame().IsMultiplayer()) { return; }
-        
-        funds -= amount;
-
-        if (funds < 0) {
-            funds = 0;
-        }
-    }
-
-    void AddMember(string name, string id) {
-        if (/*!IsMember(id)*/true) {
-            int randoRankIndex = Math.RandomInt(0, (GetClanManager().GetConfig().GetRanks().Count() - 1));
-            int randoRank = GetClanManager().GetConfig().GetRanks()[randoRankIndex].GetRank();
-            ref ClanMember member = new ClanMember(name, id, randoRank);
-
-            members.Insert(member);
-            Save();
-        }
-    }
-
-    void RemoveMember(string id) {
-        if (id == ownerId) { return; }
-
-        ref ClanMember member = GetMember(id);
-
-        if (member) {
-            members.RemoveItem(member);
-            Save();
-        }
-    }
-
-    void PromoteMember(string playerId) {
-        if (playerId == ownerId) { return; }
-
-        ref ClanMember member = GetMember(playerId);
-
-        if (member) {
-            member.Promote();
-            Save();
-        }
-    }
-
-    void DemoteMember(string playerId) {
-        if (playerId == ownerId) { return; }
-
-        ref ClanMember member = GetMember(playerId);
-
-        if (member) {
-            member.Demote();
-            Save();
-        }
-    }
+    
+    /*
+     * Critical functions for data management
+    */
 
     bool VerifyDate() {
         if (!GetGame().IsServer() || !GetGame().IsMultiplayer()) { return false; }
@@ -82,19 +28,6 @@ class Clan : ClanBase {
         if (y > 0 && m > 0 && d > 0) {
             int dayDiff = d - dayLastActive;
             int monthDiff = m - monthLastActive;
-
-            /* Print("AHHHHHHHHHHHHHHHHHH = " + (y - yearLastActive));
-            Print("SAVE YEAR = " + yearLastActive);
-            Print("SAVE MONTH = " + monthLastActive);
-            Print("SAVE DAY = " + dayLastActive);
-            Print("YEAR = " + y);
-            Print("MONTH = " + m);
-            Print("DAY = " + d);
-            Print("DAY DIFF = " + dayDiff);
-            Print("MONTH DIFF = " + monthDiff);
-            Print("DAY DAY  DIFF = " + (d - dayLastActive));
-            Print("MONTH MONTH DIFF = " + (m - monthLastActive));
-            Print("REEEEEEEE = " + (monthDiff + 12)); */
 
             // Deletion conditions. If this function returns false, it'll delete the clan
             if (y != yearLastActive) {
@@ -113,44 +46,77 @@ class Clan : ClanBase {
     bool Verify() {
         if (!GetGame().IsServer() || !GetGame().IsMultiplayer()) { return false; }
 
-        bool foundOwner = false;
-        ref array<ref ClanMemberRank> ranks = GetClanManager().GetConfig().GetRanks();
+        ref array<ref ClanMemberRank> arrayConfigRanks;
+        ref array<ref ClanMember> arrayMembersToDelete = new array<ref ClanMember>();
+        ref ClanMember owner, previousMember;
+        int clanPlayerCap, currentMemberCount;
+
+        arrayConfigRanks = GetClanManager().GetConfig().GetRanks();
+        clanPlayerCap = GetClanManager().GetConfig().GetClanPlayerCap(clanLevel);
+        currentMemberCount = 1;
+
+        Print(ClanStatic.debugPrefix + "CLAN PLAYER CAP=" + clanPlayerCap);
 
         if (!VerifyDate()) {
             return false;
         }
-        foreach (ClanMember member : members) {
-            if (member.GetId() == ownerId) {
-                foundOwner = true;
+        for (int i = (arrayClanMembers.Count() - 1); i >= 0; i--) {
+            ref ClanMember clanMember = arrayClanMembers[i];
+            currentMemberCount++;
+
+            if (!clanMember) {
+                arrayClanMembers.Remove(i);
+                continue;
+            }
+            if (previousMember && previousMember.GetPlayerId() == clanMember.GetPlayerId()) {
+                arrayClanMembers.Remove(i);
+                continue;
+            }
+            previousMember = clanMember;
+
+            if (currentMemberCount > clanPlayerCap) {
+                Print(ClanStatic.debugPrefix + "CURRENT COUNT GREATER THAN PLAYER CAP");
+                arrayClanMembers.Remove(i);
+                continue;
+            }
+            if (clanMember.GetPlayerId() == ownerId) {
+                owner = clanMember;
+                currentMemberCount--;
             } else {
-                int mRank = member.GetRank();
-                int lowestRank = ranks[ranks.Count() - 1].GetRank();
+                int memberRank = clanMember.GetPlayerRank();
+                int lowestRank = GetClanManager().GetConfig().GetLowestRank().GetRank();
 
-                if (mRank == 0) {
-                    member.SetRank(lowestRank);
-                } else {
-                    if (!GetClanManager().GetConfig().FindRank(mRank)) {
-                        bool rankSet = false;
+                if (memberRank == 0) {
+                    clanMember.SetRank(lowestRank);
+                } else if (!GetClanManager().GetConfig().FindRankByInt(memberRank)) {
+                    bool rankSet = false;
 
-                        foreach (ClanMemberRank r : ranks) {
-                            if (r) {
-                                if (mRank < r.GetRank()) {
-                                    member.SetRank(r.GetRank());
-                                    rankSet = true;
-                                    break;
-                                }
+                    foreach (ClanMemberRank rank : arrayConfigRanks) {
+                        if (rank) {
+                            if (memberRank < rank.GetRank()) {
+                                clanMember.SetRank(rank.GetRank());
+                                rankSet = true;
+                                break;
                             }
                         }
-                        if (!rankSet) {
-                            member.SetRank(lowestRank);
-                        }
+                    }
+                    if (!rankSet) {
+                        clanMember.SetRank(lowestRank);
                     }
                 }
             }
         }
-        if (!foundOwner) {
-            ref ClanMember owner = new ClanMember(ownerName, ownerId, 0);
-            members.Insert(owner);
+        if (!owner) {
+            Print(ClanStatic.debugPrefix + "OWNER NOT FOUND");
+            owner = new ClanMember(ownerName, ownerId, ownerPlainId, 0);
+            arrayClanMembers.Insert(owner);
+        } else {
+            if (owner.GetPlayerRank() != 0) {
+                owner.SetRank(0);
+            }
+        }
+        if (clanLevel < 1) {
+            clanLevel = 1;
         }
         Save();
         return true;
@@ -158,41 +124,186 @@ class Clan : ClanBase {
 
     void Save() {
         if (!GetGame().IsServer() || !GetGame().IsMultiplayer()) { return; }
-
-        string clanDir = ClanStatic.clanDirectory + "\\" + clanName + ClanStatic.fileExtension;
+        string clanDir = ClanStatic.clanDirectory + ownerPlainId + ClanStatic.fileExtension;
 
         GetYearMonthDayUTC(yearLastActive, monthLastActive, dayLastActive);
         JsonFileLoader<Clan>.JsonSaveFile(clanDir, Clan.Cast(this));
     }
 
-    ref ClanMember GetMember(string id) {
-        ref ClanMember member;
+    void Delete() {
+        if (!GetGame().IsServer() || !GetGame().IsMultiplayer()) { return; }
+        string clanDir = ClanStatic.clanDirectory + ownerPlainId + ClanStatic.fileExtension;
 
-        foreach (ClanMember m : members) {
-            if (m.GetId() == id) {
-                member = m;
-                break;
-            }
+        DeleteFile(clanDir);
+    }
+
+    void AddFunds(int amount) {
+        clanFunds += Math.AbsInt(amount);
+        Save();
+    }
+
+    void RemoveFunds(int amount) {
+        clanFunds -= Math.AbsInt(amount);
+
+        if (clanFunds < 0) {
+            clanFunds = 0;
         }
-        return member;
+        Save();
     }
 
-    ref array<ref ClanMember> GetMembers() {
-        return members;
+    void UpgradeClan() {
+        clanLevel += 1;
+        
+        Save();
     }
 
-    bool IsMember(string playerId) {
-        if (GetMember(playerId)) {
+    bool AddMemberContributions(string playerId, int contributionAmount) {
+        ref ClanMember clanMember = GetClanMemberByPlayerId(playerId);
+
+        if (clanMember) {
+            clanMember.AddContribution(contributionAmount);
+            Save();
             return true;
         }
         return false;
     }
 
+    bool CanUpgradeClan(out int upgradeCost) {
+        upgradeCost = GetUpgradePrice();
+        
+        if (upgradeCost <= clanFunds) {
+            return true;
+        }
+        return false;
+    }
+
+    int GetUpgradePrice() {
+        ref ClanConfig config;
+        int startingUpgradePrice, upgradeCost;
+        float perLevelMultiplier;
+
+        config = GetClanManager().GetConfig();
+        startingUpgradePrice = config.GetStartingClanUpgradePrice();
+        perLevelMultiplier = config.GetClanPerLevelMultiplier();
+
+        if ((clanLevel - 1) < 1) {
+            upgradeCost = startingUpgradePrice;
+        } else {
+            upgradeCost = Math.Ceil(((clanLevel - 1) * perLevelMultiplier * startingUpgradePrice));
+        }
+        return upgradeCost;
+    }
+    
+    /*
+     * Critical functions for data management
+    */
+    
+    /*
+     * Critical functions for member management
+    */
+
+    void AddMember(string playerName, string playerId, string playerPlainId) {
+        ref ClanMember newMember = new ClanMember(playerName, playerId, playerPlainId, GetClanManager().GetConfig().GetLowestRank().GetRank());
+
+        arrayClanMembers.Insert(newMember);
+        Save();
+    }
+
+    bool RemoveMember(string playerId) {
+        //if (playerId == ownerId) { return; }
+        ref ClanMember clanMember = GetClanMemberByPlayerId(playerId);
+
+        if (clanMember) {
+            arrayClanMembers.RemoveItem(clanMember);
+            Save();
+            return true;
+        }
+        return false;
+    }
+
+    bool UpdateMemberName(string playerId, string playerName) {
+        ref ClanMember clanMember = GetClanMemberByPlayerId(playerId);
+
+        if (clanMember) {
+            if (clanMember.GetPlayerName() != playerName) {
+                clanMember.SetName(playerName);
+                Save();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    bool PromoteMember(string playerId) {
+        //if (playerId == ownerId) { return; }
+        ref ClanMember clanMember = GetClanMemberByPlayerId(playerId);
+
+        if (clanMember) {
+            clanMember.Promote();
+            Save();
+        }
+        return true;
+    }
+
+    bool DemoteMember(string playerId) {
+        //if (playerId == ownerId) { return; }
+        ref ClanMember clanMember = GetClanMemberByPlayerId(playerId);
+
+        if (clanMember) {
+            clanMember.Demote();
+            Save();
+            return true;
+        }
+        return false;
+    }
+    
+    /*
+     * Critical functions for member management
+    */
+    
+    /*
+     * Getters
+    */
+
+    ref array<ref ClanMember> GetMembers() {
+        return arrayClanMembers;
+    }
+
+    ref ClanMember GetClanMemberByPlayerId(string playerId) {
+        foreach (ClanMember clanMember : arrayClanMembers) {
+            if (clanMember) {
+                if (clanMember.GetPlayerId() == playerId || clanMember.GetPlayerPlainId() == playerId) {
+                    return clanMember;
+                }
+            }
+        }
+        return null;
+    }
+
     int GetFunds() {
-        return funds;
+        return clanFunds;
+    }
+
+    string GetClanId() {
+        return ownerPlainId;
     }
 
     string GetOwnerId() {
         return ownerId;
     }
+
+    string GetOwnerPlainId() {
+        return ownerPlainId;
+    }
+
+    bool IsPlayerInClan(string playerId) {
+        if (GetClanMemberByPlayerId(playerId)) {
+            return true;
+        }
+        return false;
+    }
+    
+    /*
+     * Getters
+    */
 }

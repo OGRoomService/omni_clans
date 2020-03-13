@@ -1,0 +1,16 @@
+MetaFileClass {
+ Name "{C45025998CB7BD23}omni_clans/gui/img/chevron.edds"
+ Author "bryanpc"
+ ChangeDate 892577880
+ Configurations {
+  TGAResourceClass PC {
+   SourceFile "chevron.tga"
+  }
+  TGAResourceClass XBOX_ONE : PC {
+  }
+  TGAResourceClass PS4 : PC {
+  }
+  TGAResourceClass LINUX : PC {
+  }
+ }
+}

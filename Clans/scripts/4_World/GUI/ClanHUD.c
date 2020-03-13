@@ -1,24 +1,22 @@
 class ClanHud {
     private ref Widget wRoot;
-    private ref ActiveClan clan;
-    private ref array<ref ClanMemberTracker> arrayTrackers;
-    private ref map<ref ClanMemberTracker, ref ClanVisualTracker> mapVisualTrackers;
+    private ref array<ref ClanVisualTracker> arrayVisualTrackers;
 
     void ClanHud(ref ActiveClan activeClan) {
-        arrayTrackers = new array<ref ClanMemberTracker>();
-        mapVisualTrackers = new map<ref ClanMemberTracker, ref ClanVisualTracker>();
-
-        wRoot = GetGame().GetWorkspace().CreateWidgets("Clans\\layouts\\ClanHud.layout", NULL);
-        clan = activeClan;
-        arrayTrackers = clan.GetTrackers();
+        arrayVisualTrackers = new array<ref ClanVisualTracker>();
+        wRoot = GetGame().GetWorkspace().CreateWidgets("omni_clans\\gui\\layouts\\ClanHud.layout", NULL);
 
         InitVisualTrackers();
     }
 
     void InitVisualTrackers() {
-        foreach (ClanMemberTracker tracker : arrayTrackers) {
-            ClanVisualTracker visualTracker = new ClanVisualTracker(tracker, wRoot);
-            mapVisualTrackers.Set(tracker, visualTracker);
+        delete arrayVisualTrackers;
+        arrayVisualTrackers = new array<ref ClanVisualTracker>();
+
+        foreach (ClanMemberTracker tracker : GetClanClientManager().GetClan().GetTrackers()) {
+            if (tracker && tracker.GetPlayerId() != GetGame().GetPlayer().GetIdentity().GetId()) {
+                AddVisualTracker(tracker);
+            }
         }
     }
 
@@ -26,21 +24,39 @@ class ClanHud {
         // Not sure what I'll be doing here
     }
 
-    void AddVisualTracker(ref ClanMemberTracker tracker) {
-        Print("ADDING VISUAL TRACKER");
-        RemoveVisualTracker(tracker);
-        
-        ClanVisualTracker visualTracker = new ClanVisualTracker(tracker, wRoot);
-        mapVisualTrackers.Set(tracker, visualTracker);
+    void UpdateTrackerColors() {
+        foreach (ClanVisualTracker visualTracker : arrayVisualTrackers) {
+            if (visualTracker) {
+                visualTracker.UpdateChevronColor();
+            }
+        }
     }
 
-    void RemoveVisualTracker(ref ClanMemberTracker tracker) {
-        ref ClanVisualTracker visualTracker;
-
-        if (mapVisualTrackers.Find(tracker, visualTracker)) {
-            Print("REMOVING VISUAL TRACKER");
-            mapVisualTrackers.Remove(tracker);
-            delete visualTracker;
+    void AddVisualTracker(ref ClanMemberTracker tracker) {
+        if (tracker.GetPlayerId() != GetGame().GetPlayer().GetIdentity().GetId()) {
+            Print(ClanStatic.debugPrefix + "ADDING VISUAL TRACKER");
+            ClanVisualTracker newVisualTracker = new ClanVisualTracker(tracker, wRoot);
+            arrayVisualTrackers.Insert(newVisualTracker)
         }
+    }
+
+    void RemoveVisualTracker(string playerId) {
+        foreach (ClanVisualTracker visualTracker : arrayVisualTrackers) {
+            if (visualTracker.GetPlayerId() == playerId) {
+                Print(ClanStatic.debugPrefix + "REMOVING VISUAL TRACKER " + playerId + " || visual tracker " + visualTracker);
+                arrayVisualTrackers.RemoveItem(visualTracker);
+                delete visualTracker;
+                return;
+            }
+        }
+    }
+
+    bool DoesTrackerExist(string playerId) {
+        foreach (ClanVisualTracker visualTracker : arrayVisualTrackers) {
+            if (visualTracker && visualTracker.GetPlayerId() == playerId) {
+                return true;
+            }
+        }
+        return false;
     }
 }

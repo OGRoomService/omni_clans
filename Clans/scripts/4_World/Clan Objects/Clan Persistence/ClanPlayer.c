@@ -1,18 +1,24 @@
 class ClanPlayer {
-    private string clanName, playerId;
+    private string clanId, playerPlainId;
     private int totalContributions;
 
-    void ClanPlayer(string name, string id) {
-        clanName = name;
-        playerId = id;
+    void ClanPlayer(string playerPlainId) {
+        this.playerPlainId = playerPlainId;
+    }
+    
+    void SetClanId(string clanId) {
+        this.clanId = clanId;
     }
 
-    void Save() {
-        string playerDir = ClanStatic.playerDirectory + "\\" + playerId + ClanStatic.playerDataFile + ClanStatic.fileExtension;
-        JsonFileLoader<ClanPlayer>.JsonSaveFile(playerDir, this);
+    void AddContributions(int amount) {
+        totalContributions += Math.AbsInt(amount);
     }
 
-    string GetClanName() {
-        return clanName;
+    string GetClanId() {
+        return clanId;
+    }
+
+    string GetPlainId() {
+        return playerPlainId;
     }
 }

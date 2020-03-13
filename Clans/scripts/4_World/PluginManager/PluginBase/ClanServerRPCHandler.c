@@ -7,63 +7,79 @@ class ClanServerRPCHandler : PluginBase {
         GetDayZGame().Event_OnRPC.Remove(ServerRPCHandler);
     }
 
+    // [REWRITE] Entire file. Make this way easier to read.
     void ServerRPCHandler(PlayerIdentity sender, Object target, int rpc_type, ParamsReadContext ctx) {
         if (!sender) { return; }
 
-        ref ActiveClan clan;
+        ref ActiveClan clan, previousClan;
         ref ClanMember clanMember, targetClanMember;
+        ref ClanConfig clanConfig;
         PlayerBase player, targetPlayer;
-        string clanName, error, playerId, targetPlayerId;
-        int clanMemberRank, targetClanMemberRank;
+        string clanName, clanId, playerId, playerPlainId, targetPlayerId, targetPlayerName;
+        int clanMemberRank, targetClanMemberRank, fundsToContribute, clanUpgradeCost, clanMenuError;
+        map<ItemBase, ref ClanConfigCurrency> mapCurrencyItems;
 
         switch (rpc_type) {
             case ClanRPCEnum.ServerCreateClan:
                 {
+                    Print(ClanStatic.debugPrefix + "RPC Create Clan | RPC Received");
                     Param1<string> dataCreateClan;
                     if (!ctx.Read(dataCreateClan)) { return; }
-
-                    // Add filter here. Check a file against the name. Load the entire file as an array of string
-                    // and loop through it and check if the string contains and of the elements, don't allow it to be created
-                    // if it does.
 
                     player = PlayerBase.Cast(target);
                     clanName = dataCreateClan.param1;
 
+                    Print(ClanStatic.debugPrefix + "RPC Create Clan | Data Read | player=" + player.GetIdentity().GetId() + " | clan name=" + clanName);
                     if (player && clanName != string.Empty) {
-                        if (GetClanServerManager().CanCreateClan(player, clanName, error)) {
-                            error = "exit";
-                            GetClanServerManager().CreateClan(player, clanName);
-                        }
-                        if (error == string.Empty) {
-                            error = "unknown error occurred!";
-                        }
-                        auto params = new Param1<string>(error);
+                        Param1<int> params;
+                        int clanCreationCost = GetClanManager().GetConfig().GetClanCreationCost();
+                        Print(ClanStatic.debugPrefix + "RPC Create Clan | Player exists and clanname is not empty!");
 
-                        GetGame().RPCSingleParam(player, ClanRPCEnum.ClientManageMenu, params, true, sender);
+                        if (GetClanServerManager().HasEnoughCurrency(player, clanCreationCost, mapCurrencyItems)) {
+                            Print(ClanStatic.debugPrefix + "RPC Create Clan | Player has enough currency to create a clan!");
+                            if (GetClanServerManager().CanCreateClan(player, clanName, clanMenuError)) {
+                                Print(ClanStatic.debugPrefix + "RPC Create Clan | Player can create clan, creating!");
+                                GetClanServerManager().CreateClan(player, clanName);
+                                GetClanServerManager().DeductPlayerCurrency(player, clanCreationCost, mapCurrencyItems);
+                            } else {
+                                params = new Param1<int>(clanMenuError);
+                                GetGame().RPCSingleParam(player, ClanRPCEnum.ClientManageMenu, params, true, sender);
+                            }
+                        } else {
+                            params = new Param1<int>(ClanCreateErrorEnum.NO_FUNDS);
+                            GetGame().RPCSingleParam(player, ClanRPCEnum.ClientManageMenu, params, true, sender);
+                        }
                     }
                     break;
                 }
             case ClanRPCEnum.ServerAddInvitation:
                 {
+                    Print(ClanStatic.debugPrefix + "RPC Add Invitation | RPC Received!");
                     Param1<string> dataAddInvitation;
                     if (!ctx.Read(dataAddInvitation)) { return; }
-
-                    Print("Received rpc to attach invite");
 
                     player = PlayerBase.Cast(target);
                     targetPlayerId = dataAddInvitation.param1;
 
-                    if (player && targetPlayerId != string.Empty) {
-                        clan = GetClanServerManager().GetActiveClanByPlayerIdentity(player.GetIdentity());
+                    Print(ClanStatic.debugPrefix + "RPC Add Invitation | Data Read! | player=" + player.GetIdentity().GetId() + " | target player=" + targetPlayerId);
 
-                        if (clan && clan.IsMember(player.GetIdentity().GetPlainId())) {
-                            targetPlayer = GetClanServerManager().GetPlayerBaseById(targetPlayerId);
-                            
-                            if (targetPlayer) {
-                                clan.AddInvitation(targetPlayerId);
+                    if (player && targetPlayerId != string.Empty && targetPlayerId != player.GetIdentity().GetId()) {
+                        clan = GetClanServerManager().GetClanById(player.GetActiveClanId());
 
-                                auto paramsInvite = new Param1<string>(clanName);
-                                GetGame().RPCSingleParam(targetPlayer, ClanRPCEnum.ClientReceiveInvite, paramsInvite, true, targetPlayer.GetIdentity());
+                        Print(ClanStatic.debugPrefix + "RPC Add Invitation | Conditionals met, searching for clan! | clan id=" + player.GetActiveClanId() + " | clan=" + clan);
+                        if (clan && clan.IsPlayerInClan(player.GetIdentity().GetId()) && clan.GetMembers().Count() < GetClanManager().GetConfig().GetClanPlayerCap(clan.GetRank()) && !clan.IsPlayerInvited(targetPlayerId) && !clan.IsPlayerInClan(targetPlayerId)) {
+                            Print(ClanStatic.debugPrefix + "RPC Add Invitation | Second Conditionals met, checking permissions! rank=" + clan.GetClanMemberByPlayerId(player.GetIdentity().GetId()).GetPlayerRank());
+                            if (GetClanManager().GetConfig().CanInviteMembers(clan.GetClanMemberByPlayerId(player.GetIdentity().GetId()).GetPlayerRank())) {
+                                targetPlayer = GetClanServerManager().GetPlayerBaseById(targetPlayerId);
+                                Print(ClanStatic.debugPrefix + "RPC Add Invitation | Permissions validated, searching for player! | id=" + targetPlayerId + " | player=" + player.GetIdentity().GetId());
+
+                                if (targetPlayer && targetPlayer.GetIdentity()) {
+                                    Print(ClanStatic.debugPrefix + "RPC Add Invitation | Player found, sending invite!");
+                                    auto paramsInvite = new Param2<string, string>(clan.GetClanId(), clan.GetName());
+                                    
+                                    clan.AddInvitation(targetPlayerId, targetPlayer.GetIdentity().GetName());
+                                    GetGame().RPCSingleParam(targetPlayer, ClanRPCEnum.ClientReceiveInvite, paramsInvite, true, targetPlayer.GetIdentity());
+                                }
                             }
                         }
                     }
@@ -71,71 +87,75 @@ class ClanServerRPCHandler : PluginBase {
                 }
             case ClanRPCEnum.ServerManageInvite:
                 {
-                    Param1<string> dataManageInvite;
+                    Print(ClanStatic.debugPrefix + "RPC Manage Invite | RPC Received");
+                    Param2<string, bool> dataManageInvite;
                     if (!ctx.Read(dataManageInvite)) { return; }
 
+                    bool clientAcceptedInvite = dataManageInvite.param2;
                     player = PlayerBase.Cast(target);
-                    string selectedOption = dataManageInvite.param1;
+                    clanId = dataManageInvite.param1;
 
-                    Print("Received rpc to manage invite by player");
-                    // This is fucked. Not even sure what's happening
-                    // FIX THIS It's currently only allowing players already in the clan to be invited
-                    // FIX THIS
-                    // FIX THIS
-                    // FIX THIS
-                    // FIX THIS
-                    // FIX THIS
-                    // FIX THIS
-                    // FIX THIS
-                    // FIX THIS
-                    // FIX THIS
+                    Print(ClanStatic.debugPrefix + "RPC Manage Invite | Data read | accepted=" + clientAcceptedInvite + " | player=" + player.GetIdentity().GetId() + " | clan id=" + clanId);
 
                     if (player) {
-                        clan = GetClanServerManager().GetActiveClanByPlayerIdentity(player.GetIdentity());
-                        playerId = player.GetIdentity().GetPlainId();
+                        Print(ClanStatic.debugPrefix + "RPC Manage Invite | Player found");
+                        clan = GetClanServerManager().GetClanById(clanId);
+                        Print(ClanStatic.debugPrefix + "RPC Manage Invite | Searching for clan " + clan);
 
-                        if (clan && clan.IsMember(playerId)) {
-                            // Get the clan member, find their permissions, and go from there... If they can actually invite a user, allow it
-                            if (selectedOption == "btnAcceptInvite" && clan.IsPlayerInvited(playerId)) {
-                                clan.AddMember(player.GetIdentity().GetName(), playerId);
-                                clan.AddTracker(player);
+                        if (clan && clan.IsPlayerInvited(player.GetIdentity().GetId()) && clan.GetMembers().Count() < GetClanManager().GetConfig().GetClanPlayerCap(clan.GetRank())) {
+                            Print(ClanStatic.debugPrefix + "RPC Manage Invite | Clan found and player is invited | " + clan.GetClanId());
+                            if (clientAcceptedInvite) {
+                                previousClan = GetClanServerManager().GetClanById(player.GetActiveClanId());
+
+                                if (previousClan) {
+                                    Print(ClanStatic.debugPrefix + "RPC Manage Invite | Previous clan from player found! " + previousClan.GetOwnerId());
+                                    if (previousClan.GetOwnerId() == player.GetIdentity().GetId()) {
+                                        Print(ClanStatic.debugPrefix + "RPC Manage Invite | Player is owner of previous clan, deleting!");
+                                        GetClanServerManager().DeleteClan(previousClan);
+                                    } else {
+                                        Print(ClanStatic.debugPrefix + "RPC Manage Invite | Removing member from previous clan!");
+                                        GetClanServerManager().RemoveMemberFromClan(previousClan, player);
+                                    }
+                                }
+                                Print(ClanStatic.debugPrefix + "RPC Manage Invite | Adding member to clan!");
+                                GetClanServerManager().AddMemberToClan(clan, player);
                             }
-                            clan.RemoveInvitation(playerId);
+                            clan.RemoveInvitation(player.GetIdentity().GetId());
                         }
                     }
                     break;
                 }
             case ClanRPCEnum.ServerPromoteClanMember:
                 {
-                    Print("Received promotion RPC");
+                    Print(ClanStatic.debugPrefix + "RPC Promote Member | RPC Received");
                     Param1<string> dataPromoteMember;
                     if (!ctx.Read(dataPromoteMember)) { return; }
 
                     player = PlayerBase.Cast(target);
-                    playerId = player.GetIdentity().GetPlainId();
                     targetPlayerId = dataPromoteMember.param1;
 
+                    Print(ClanStatic.debugPrefix + "RPC Promote Member | Data read | player=" + player.GetIdentity().GetId() + " | target player=" + targetPlayerId);
                     if (player && targetPlayerId != string.Empty) {
-                        clan = GetClanServerManager().GetActiveClanByPlayerIdentity(player.GetIdentity());
+                        clan = GetClanServerManager().GetClanById(player.GetActiveClanId());
+                        Print(ClanStatic.debugPrefix + "RPC Promote Member | Conditionals met, searching for clan | clan id=" + player.GetActiveClanId() + " | clan=" + clan);
 
-                        if (clan) {
-                            clanMember = clan.GetMember(playerId);
+                        if (clan && clan.IsPlayerInClan(player.GetIdentity().GetId()) && clan.IsPlayerInClan(targetPlayerId)) {
+                            Print(ClanStatic.debugPrefix + "RPC Promote Member | Second conditionals met, validating permissions");
+                            clanMemberRank = clan.GetClanMemberByPlayerId(player.GetIdentity().GetId()).GetPlayerRank();
+                            clanConfig = GetClanManager().GetConfig();
 
-                            if (clanMember) {
-                                targetClanMember = clan.GetMember(targetPlayerId);
+                            if (clanConfig.CanPromoteMembers(clanMemberRank)) {
+                                Print(ClanStatic.debugPrefix + "RPC Promote Member | Permissions validated");
+                                int clanMemberRankIndex, targetClanMemberRankIndex;
 
-                                if (targetClanMember) {
-                                    clanMemberRank = clanMember.GetRank();
-                                    targetClanMemberRank = targetClanMember.GetRank();
+                                targetClanMemberRank = clan.GetClanMemberByPlayerId(targetPlayerId).GetPlayerRank();
+                                clanMemberRankIndex = clanConfig.GetRankIndex(clanMemberRank);
+                                targetClanMemberRankIndex = clanConfig.GetRankIndex(targetClanMemberRank);
 
-                                    if (clanMemberRank < targetClanMemberRank && !GetClanManager().GetConfig().IsLowestRank(targetClanMemberRank) && !GetClanManager().GetConfig().IsHighest(targetClanMemberRank)) {
-                                        if (GetClanManager().GetConfig().CanPromoteMembers(clanMemberRank)) {
-                                            clan.PromoteMember(targetPlayerId);
-                                        }
-                                    }
+                                if ((clanMemberRankIndex != -1 && targetClanMemberRankIndex != -1 && (targetClanMemberRankIndex - 1) > clanMemberRankIndex && !clanConfig.IsHighestRank(targetClanMemberRank)) || clan.GetOwnerId() == player.GetIdentity().GetId()) {
+                                    Print(ClanStatic.debugPrefix + "RPC Promote Member | User is still a rank lower after promotion, promoting");
+                                    clan.PromoteMember(targetPlayerId);
                                 }
-                            } else {
-                                GetClanServerManager().RemovePlayerFromActiveClan(player);
                             }
                         }
                     }
@@ -143,35 +163,149 @@ class ClanServerRPCHandler : PluginBase {
                 }
             case ClanRPCEnum.ServerDemoteClanMember:
                 {
-                    Print("Received demotion RPC");
+                    Print(ClanStatic.debugPrefix + "RPC Demote Member | RPC Received");
                     Param1<string> dataDemoteMember;
                     if (!ctx.Read(dataDemoteMember)) { return; }
 
                     player = PlayerBase.Cast(target);
-                    playerId = player.GetIdentity().GetPlainId();
                     targetPlayerId = dataDemoteMember.param1;
 
+                    Print(ClanStatic.debugPrefix + "RPC Demote Member | Data read | player=" + player.GetIdentity().GetId() + " | target player=" + targetPlayerId);
                     if (player && targetPlayerId != string.Empty) {
-                        clan = GetClanServerManager().GetActiveClanByPlayerIdentity(player.GetIdentity());
+                        clan = GetClanServerManager().GetClanById(player.GetActiveClanId());
 
-                        if (clan) {
-                            clanMember = clan.GetMember(playerId);
+                        Print(ClanStatic.debugPrefix + "RPC Demote Member | Conditionals met, searching for clan | clan id=" + player.GetActiveClanId() + " | clan=" + clan);
+                        if (clan && clan.IsPlayerInClan(player.GetIdentity().GetId()) && clan.IsPlayerInClan(targetPlayerId)) {
+                            clanMemberRank = clan.GetClanMemberByPlayerId(player.GetIdentity().GetId()).GetPlayerRank();
 
-                            if (clanMember) {
-                                targetClanMember = clan.GetMember(targetPlayerId);
+                            Print(ClanStatic.debugPrefix + "RPC Promote Member | Second conditionals met, validating permissions");
+                            if (GetClanManager().GetConfig().CanDemoteMembers(clanMemberRank)) {
+                                targetClanMemberRank = clan.GetClanMemberByPlayerId(targetPlayerId).GetPlayerRank();
 
-                                if (targetClanMember) {
-                                    clanMemberRank = clanMember.GetRank();
-                                    targetClanMemberRank = targetClanMember.GetRank();
+                                if (clanMemberRank < targetClanMemberRank && !GetClanManager().GetConfig().IsLowestRank(targetClanMemberRank)) {
+                                    Print(ClanStatic.debugPrefix + "RPC Demote Member | Demoting member");
+                                    clan.DemoteMember(targetPlayerId);
+                                }
+                            }
+                        }
+                    }
+                    break;
+                }
+            case ClanRPCEnum.ServerContributeFundsToClan:
+                {
+                    Print(ClanStatic.debugPrefix + "RPC Contribute Funds | RPC Received!");
+                    Param1<int> dataContributeFunds;
+                    if (!ctx.Read(dataContributeFunds)) { return; }
 
-                                    if (clanMemberRank < targetClanMemberRank && !GetClanManager().GetConfig().IsLowestRank(targetClanMemberRank) && !GetClanManager().GetConfig().IsHighest(targetClanMemberRank)) {
-                                        if (GetClanManager().GetConfig().CanDemoteMembers(clanMemberRank)) {
-                                            clan.DemoteMember(targetPlayerId);
-                                        }
+                    player = PlayerBase.Cast(target);
+                    fundsToContribute = dataContributeFunds.param1;
+
+                    Print(ClanStatic.debugPrefix + "RPC Contribute Funds | Data read | player=" + player.GetIdentity().GetId() + " | funds amount=" + fundsToContribute);
+                    if (player) {
+                        clan = GetClanServerManager().GetClanById(player.GetActiveClanId());
+
+                        Print(ClanStatic.debugPrefix + "RPC Contribute Funds | Conditionals met, searching for clan | clan id=" + player.GetActiveClanId() + " | clan=" + clan);
+                        if (clan && clan.IsPlayerInClan(player.GetIdentity().GetId())) {
+                            Print(ClanStatic.debugPrefix + "RPC Contribute Funds | Second conditionals met, validating permissions!");
+                            if (GetClanManager().GetConfig().CanContributeFunds(clan.GetClanMemberByPlayerId(player.GetIdentity().GetId()).GetPlayerRank())) {
+                                if (GetClanServerManager().HasEnoughCurrency(player, fundsToContribute, mapCurrencyItems)) {
+                                    Print(ClanStatic.debugPrefix + "RPC Contribute Funds | Player has enough currency, contributing!");
+                                    GetClanServerManager().DeductPlayerCurrency(player, fundsToContribute, mapCurrencyItems);
+                                    GetClanServerManager().AddPlayerContributions(player.GetIdentity().GetPlainId(), fundsToContribute);
+                                    clan.AddFunds(fundsToContribute);
+                                    clan.AddMemberContributions(player.GetIdentity().GetId(), fundsToContribute);
+                                } else {
+                                    Print(ClanStatic.debugPrefix + "RPC Contribute Funds | Player does not have enough currency!");
+                                    auto paramsManageMenu = new Param1<int>(ClanCreateErrorEnum.NO_FUNDS);
+
+                                    GetGame().RPCSingleParam(player, ClanRPCEnum.ClientManageMenu, paramsManageMenu, true, player.GetIdentity());
+                                }
+                            }
+                        }
+                    }
+                    break;
+                }
+            case ClanRPCEnum.ServerKickFromClan:
+                {
+                    Print(ClanStatic.debugPrefix + "RPC Kick Member | RPC Received!");
+                    Param1<string> dataKickFromClan;
+                    if (!ctx.Read(dataKickFromClan)) { return; }
+
+                    player = PlayerBase.Cast(target);
+                    targetPlayerId = dataKickFromClan.param1;
+
+                    Print(ClanStatic.debugPrefix + "RPC Kick Member | Data read | player=" + player.GetIdentity().GetId() + " | target player=" + targetPlayerId);
+                    if (player) {
+                        clan = GetClanServerManager().GetClanById(player.GetActiveClanId());
+
+                        Print(ClanStatic.debugPrefix + "RPC Kick Member | Conditionals met, searching for clan | clan id=" + player.GetActiveClanId() + " | clan=" + clan);
+                        if (clan && clan.IsPlayerInClan(player.GetIdentity().GetId()) && clan.IsPlayerInClan(targetPlayerId)) {
+                            clanMemberRank = clan.GetClanMemberByPlayerId(player.GetIdentity().GetId()).GetPlayerRank();
+
+                            Print(ClanStatic.debugPrefix + "RPC Kick Member | Second conditionals met, validating permissions!");
+                            if (GetClanManager().GetConfig().CanKickMembers(clanMemberRank)) {
+                                targetClanMemberRank = clan.GetClanMemberByPlayerId(targetPlayerId).GetPlayerRank();
+
+                                Print(ClanStatic.debugPrefix + "RPC Kick Member | Third conditionals met, checking hierarchy!");
+                                if (clanMemberRank < targetClanMemberRank) {
+                                    targetPlayer = GetClanServerManager().GetPlayerBaseById(targetPlayerId);
+
+                                    Print(ClanStatic.debugPrefix + "RPC Kick Member | Rank is lower, searching for active player!");
+                                    if (targetPlayer) {
+                                        Print(ClanStatic.debugPrefix + "RPC Kick Member | Player found, removing!");
+                                        GetClanServerManager().RemoveMemberFromClan(clan, targetPlayer);
+                                    } else {
+                                        Print(ClanStatic.debugPrefix + "RPC Kick Member | Player not found, removing!");
+                                        GetClanServerManager().RemoveMemberFromClan(clan, targetPlayerId);
                                     }
                                 }
+                            }
+                        }
+                    }
+                    break;
+                }
+            case ClanRPCEnum.ServerLeaveClan:
+                {
+                    Print(ClanStatic.debugPrefix + "RPC Leave Clan | RPC Received!");
+                    player = PlayerBase.Cast(target);
+
+                    Print(ClanStatic.debugPrefix + "RPC Leave Clan | Data Read | player=" + player.GetIdentity().GetId());
+                    if (player) {
+                        clan = GetClanServerManager().GetClanById(player.GetActiveClanId());
+
+                        Print(ClanStatic.debugPrefix + "RPC Leave Clan | Conditionals met, searching for clan | clan id=" + player.GetActiveClanId() + " | clan=" + clan);
+                        if (clan) {
+                            Print(ClanStatic.debugPrefix + "RPC Leave Clan | Clan found! | owner id=" + clan.GetOwnerId());
+                            if (clan.GetOwnerId() == player.GetIdentity().GetId()) {
+                                Print(ClanStatic.debugPrefix + "RPC Leave Clan | Owner left, deleting!");
+                                GetClanServerManager().DeleteClan(clan);
                             } else {
-                                GetClanServerManager().RemovePlayerFromActiveClan(player);
+                                Print(ClanStatic.debugPrefix + "RPC Leave Clan | Player left, removing member!");
+                                GetClanServerManager().RemoveMemberFromClan(clan, player);
+                            }
+                        }
+                    }
+                    break;
+                }
+            case ClanRPCEnum.ServerUpgradeClan:
+                {
+                    Print(ClanStatic.debugPrefix + "RPC Upgrade Clan | RPC Received!");
+                    player = PlayerBase.Cast(target);
+
+                    Print(ClanStatic.debugPrefix + "RPC Upgrade Clan | Data Read! | player=" + player.GetIdentity().GetId());
+                    if (player) {
+                        clan = GetClanServerManager().GetClanById(player.GetActiveClanId());
+
+                        Print(ClanStatic.debugPrefix + "RPC Upgrade Clan | Conditionals met, searching for clan | clan id=" + player.GetActiveClanId() + " | clan=" + clan);
+                        if (clan && clan.IsPlayerInClan(player.GetIdentity().GetId())) {
+                            Print(ClanStatic.debugPrefix + "RPC Upgrade Clan | Scond conditionals met, validating permissions!");
+                            if (GetClanManager().GetConfig().CanUpgradeClan(clan.GetClanMemberByPlayerId(player.GetIdentity().GetId()).GetPlayerRank())) {
+                                if (clan.CanUpgradeClan(clanUpgradeCost)) {
+                                    Print(ClanStatic.debugPrefix + "RPC Upgrade Clan | Enough funds found, upgrading clan!");
+                                    clan.UpgradeClan();
+                                    clan.RemoveFunds(clanUpgradeCost);
+                                    GetClanServerManager().SortClans();
+                                }
                             }
                         }
                     }
@@ -179,24 +313,18 @@ class ClanServerRPCHandler : PluginBase {
                 }
             case ClanRPCEnum.ServerDeleteClan:
                 {
-                    Print("Received clan deletion RPC");
+                    Print(ClanStatic.debugPrefix + "RPC Delete Clan | RPC Received!");
                     player = PlayerBase.Cast(target);
 
+                    Print(ClanStatic.debugPrefix + "RPC Delete Clan | Data Read! | player=" + player.GetIdentity().GetId());
                     if (player) {
-                        clan = GetClanServerManager().GetActiveClanByPlayerIdentity(player.GetIdentity());
-                        playerId = player.GetIdentity().GetPlainId();
-
-                        if (clan && clan.GetOwnerId() == playerId) {
-                            string clanDir = ClanStatic.clanDirectory + "\\" + clan.GetName() + ClanStatic.fileExtension;
-                            ref array<ref ClanMemberTracker> clanTrackers = clan.GetTrackers();
-                            
-                            clan.DeleteClanRPC();
-                            GetClanServerManager().RemoveAllPlayersFromActiveClan(clanTrackers);
-                            GetClanServerManager().RemoveActiveClan(clan);
-
-                            if (FileExist(clanDir)) {
-                                DeleteFile(clanDir);
-                            }
+                        clan = GetClanServerManager().GetClanById(player.GetActiveClanId());
+                        
+                        Print(ClanStatic.debugPrefix + "RPC Delete Clan | Conditionals met, searching for clan | clan id=" + player.GetActiveClanId() + " | clan=" + clan + " | owner id=" + clan.GetOwnerId());
+                        if (clan && clan.GetOwnerId() == player.GetIdentity().GetId()) {
+                            Print(ClanStatic.debugPrefix + "RPC Delete Clan | Owner sent RPC, deleting clan!");
+                            GetClanServerManager().DeleteClan(clan);
+                            player.SetActiveClanId(string.Empty);
                         }
                     }
                     break;

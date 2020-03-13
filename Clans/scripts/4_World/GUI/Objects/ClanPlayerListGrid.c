@@ -5,7 +5,7 @@ class ClanPlayerListGrid {
     void ClanPlayerListGrid(Widget parent) {
         arrayTextWidgets = new array<ref ClanTextWidget>();
 
-        grid = GridSpacerWidget.Cast(GetGame().GetWorkspace().CreateWidgets("Clans\\layouts\\GridSpacer.layout", parent));
+        grid = GridSpacerWidget.Cast(GetGame().GetWorkspace().CreateWidgets("omni_clans\\gui\\layouts\\GridSpacer.layout", parent));
     }
 
     void ~ClanPlayerListGrid() {

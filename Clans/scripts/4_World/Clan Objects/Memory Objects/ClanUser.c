@@ -1,9 +1,9 @@
 class ClanUser {
     private string name, playerId;
 
-    void ClanUser(string n, string id) {
-        name = n;
-        playerId = id;
+    void ClanUser(string name, string playerId) {
+        this.name = name;
+        this.playerId = playerId;
     }
 
     string GetName() {

@@ -1,7 +1,17 @@
 class ClanClientManager : PluginBase {
     private ref ActiveClan activeClan;
     private ref ClanHud activeClanHud;
+    private ref ClanClientSettings clientSettings;
+    private ref ClanInvitation clanInvitation;
     private string plainId, clanInviteName;
+
+    void ClanClientManager() {
+        if (!FileExist(ClanStatic.baseModDir)) {
+            MakeDirectory(ClanStatic.baseModDir);
+        }
+        LoadClientSettings();
+        Init();
+    }
 
     ref ActiveClan GetClan() {
         return activeClan;
@@ -11,13 +21,33 @@ class ClanClientManager : PluginBase {
         return activeClanHud;
     }
 
+    ref ClanClientSettings GetClientSettings() {
+        return clientSettings;
+    }
+
+    void Init() {
+        activeClan = null;
+        activeClanHud = null;
+        plainId = string.Empty;
+        clanInviteName = string.Empty;
+    }
+
+    void LoadClientSettings() {
+        if (FileExist(ClanStatic.localSettingsDir)) {
+            JsonFileLoader<ClanClientSettings>.JsonLoadFile(ClanStatic.localSettingsDir, clientSettings);
+        } else {
+            clientSettings = new ClanClientSettings();
+        }
+        clientSettings.Verify();
+        clientSettings.Save();
+    }
+
     void SetActiveClan(ref ActiveClan clan) {
         DeleteClan();
         
         activeClan = clan;
-        activeClan.Test();
-        activeClan.Init();
         activeClanHud = new ClanHud(activeClan);
+        activeClan.Init();
     }
 
     void DeleteClan() {
@@ -29,17 +59,12 @@ class ClanClientManager : PluginBase {
         }
     }
 
-    void SetClanInvite(string clanName) {
-        if (clanInviteName != string.Empty) { return; }
-        
-        clanInviteName = clanName;
-
-        GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).Remove(DeleteInvitation);
-        GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(DeleteInvitation, 30000, false);
+    void SetClanInvite(string clanId, string clanName) {
+        clanInvitation = new ClanInvitation(clanId, clanName);
     }
 
     void DeleteInvitation() {
-        clanInviteName = string.Empty;
+        delete clanInvitation;
     }
 
     void SetPlainId(string id) {
@@ -48,8 +73,8 @@ class ClanClientManager : PluginBase {
         }
     }
 
-    string GetInvite() {
-        return clanInviteName;
+    ref ClanInvitation GetInvite() {
+        return clanInvitation;
     }
 
     string GetPlainId() {

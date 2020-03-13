@@ -1,34 +1,44 @@
 class CfgPatches
 {
-	class Clans
+	class omni_clans
 	{
-		requiredAddons[] = {};
+		requiredAddons[] = {
+            "DZ_Data", 
+            "VanillaPlusPlus"
+        };
 	};
 };
 
 class CfgMods
 {
-	class Clans
+	class omni_clans
 	{
-        type = "mod";
-        author = "RoomService";
-        dir = "Clans";
-        name = "Clans";
+		dir="omni_clans";
+		hideName=0;
+		hidePicture=0;
+		name="Omnicidal Clans";
+		credits="RoomService";
+		author="RoomService";
+		authorID="999999";
+		inputs="omni_clans\modded_Inputs.xml";
+		version="version 1.0";
+		extra=0;
+		type="mod";
 		dependencies[] = {"Game","World","Mission"};
 
 	    class defs
 	    {
             class gameScriptModule
             {
-                files[] = {"Clans\scripts\3_Game"};
+                files[] = {"omni_clans\scripts\3_Game"};
             };
             class worldScriptModule
             {
-                files[] = {"Clans\scripts\4_World"};
+                files[] = {"omni_clans\scripts\4_World"};
             };
             class missionScriptModule
             {
-                files[] = {"Clans\Scripts\5_Mission"};
+                files[] = {"omni_clans\Scripts\5_Mission"};
             };
         };
     };

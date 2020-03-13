@@ -1,59 +1,58 @@
 class ClanMemberTracker {
     private PlayerBase player;
-    private vector playerPos;
+    private vector playerPosition;
     private int posUpdateInterval = GetClanManager().GetConfig().GetTrackerPositionSens();
     private int posUpdateSens = GetClanManager().GetConfig().GetTrackerPositionSens();
     private int lastPosUpdate;
-    private string playerId, playerPlainId, playerName;
+    private string playerId, playerName;
 
-    void ClanMemberTracker(string pId, string pPlainId, string pName, vector pos) {
-        playerId = pId;
-        playerPlainId = pPlainId;
-        playerName = pName;
-        playerPos = pos;
+    void ClanMemberTracker(string playerName, string playerId, vector playerPosition) {
+        this.playerName = playerName;
+        this.playerId = playerId;
+        this.playerPosition = playerPosition;
     }
+
+    // Add client settings for this bullshit
 
     void Init() {
-        UpdateValues();
+        if (!GetGame().IsServer() || !GetGame().IsMultiplayer()) {
+            GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).RemoveByName(this, "ClientUpdatePlayerBase");
+
+            if (playerId != GetGame().GetPlayer().GetIdentity().GetId()) {
+                GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).CallLaterByName(this, "ClientUpdatePlayerBase", 1000, true);
+                if (!GetClanClientManager().GetHud().DoesTrackerExist(playerId)) {
+                    GetClanClientManager().GetHud().AddVisualTracker(this);
+                }
+            }
+        } else {
+            UpdatePlayerPosition();
+        }
     }
 
-    void UpdateValues() {
-        if (!GetGame().IsServer() || !GetGame().IsMultiplayer()) { return; }
-        playerPos = player.GetPosition();
+    void UpdatePlayerPosition() {
+        playerPosition = player.GetPosition();
     }
 
-    void SetPlayer(PlayerBase p) {
-        player = p;
+    void SetPlayer(PlayerBase player) {
+        this.player = player;
     }
 
-    void SetValues(vector updatePos) {
-        if (GetGame().IsServer() && GetGame().IsMultiplayer()) { return; }
-        playerPos = updatePos;
+    void SetPlayerPosition(vector playerPosition) {
+        this.playerPosition = playerPosition;
     }
 
     void ClientUpdatePlayerBase() {
-        if (playerPlainId == GetClanClientManager().GetPlainId()) {
-            GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).RemoveByName(this, "ClientUpdatePlayerBase");
-            return;
-        }
-        if (player) { return; }
-        array<Man> playerList = new array<Man>();
-        playerList = ClientData.m_PlayerBaseList;
-        
-        foreach (Man man : playerList) {
-            PlayerBase playerBase = PlayerBase.Cast(man);
+        if (!player || !player.IsAlive()) {
+            array<Man> playerList = new array<Man>();
+            playerList = ClientData.m_PlayerBaseList;
+            
+            foreach (Man man : playerList) {
+                PlayerBase playerBase = PlayerBase.Cast(man);
+                PlayerIdentity playerIdentity = playerBase.GetIdentity();
 
-            if (playerBase) {
-                if (!playerBase.GetIdentity()) {
-                    if (playerBase.GetType() == playerName) {
-                        SetPlayer(playerBase);
-                        break;
-                    }
-                } else {
-                    if (playerBase.GetIdentity().GetId() == playerId) {
-                        SetPlayer(playerBase)
-                        break;
-                    }
+                if (playerIdentity && playerBase && playerBase.IsAlive() && playerIdentity.GetId() == playerId) {
+                    SetPlayer(playerBase);
+                    break;
                 }
             }
         }
@@ -67,11 +66,7 @@ class ClanMemberTracker {
         return player.GetIdentity();
     }
 
-    string GetPlainId() {
-        return playerPlainId;
-    }
-
-    string GetId() {
+    string GetPlayerId() {
         return playerId;
     }
 
@@ -80,17 +75,17 @@ class ClanMemberTracker {
     }
 
     vector GetPosition() {
-        return playerPos;
+        return playerPosition;
     }
 
-    bool NeedsClanSynch() {
-        if (!GetGame().IsServer() || !GetGame().IsMultiplayer()) { return false; }
-        bool needsSync = false;
-        vector pos = player.GetPosition();
-        
-        if (vector.Distance(pos, playerPos) > posUpdateSens) {
-            UpdateValues();
-            return true;
+    bool IsPlayerPositionOOS() {
+        if (player && player.GetIdentity()) {
+            vector pos = player.GetPosition();
+            
+            if (vector.Distance(pos, playerPosition) > posUpdateSens) {
+                UpdatePlayerPosition();
+                return true;
+            }
         }
         return false;
     }
