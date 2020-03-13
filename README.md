@@ -1,4 +1,8 @@
 # omni_clans
 
 Clan mod for Omnicidal Gaming;
-Copyright RoomService 2020
+
+Copyright © 2020 by RoomService
+All rights reserved. This book or any portion thereof
+may not be reproduced or used in any manner whatsoever
+without the express written permission of the publisher
